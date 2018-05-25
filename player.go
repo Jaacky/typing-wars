@@ -9,14 +9,15 @@ import (
 type player struct {
 	id       uuid.UUID
 	nickname string
+	client   *Client
 }
 
-func createPlayer(nickname string) (*player, error) {
+func createPlayer(client *Client, nickname string) (*player, error) {
 	playerID, err := uuid.NewV4()
 	if err != nil {
 		fmt.Printf("Something went wrong creating player UUID: %s", err)
 		return nil, err
 	}
 
-	return &player{playerID, nickname}, nil
+	return &player{playerID, nickname, client}, nil
 }

@@ -166,7 +166,7 @@ func handleCreateGameRoomMessage(client *Client, msg map[string]interface{}) {
 	msgData := msg[messageData].(map[string]interface{})
 	nickname := msgData[messageDataNickname].(string)
 
-	p1, playerCreationErr := createPlayer(nickname)
+	p1, playerCreationErr := createPlayer(client, nickname)
 	if playerCreationErr != nil {
 		fmt.Printf("Something went wrong creating player: %s", playerCreationErr)
 	}
@@ -205,7 +205,7 @@ func handleEnterGameRoomMessage(client *Client, msg map[string]interface{}) {
 	// 	fmt.Printf("Somethign went wrong with getting UUID from string, %s\n", err)
 	// }
 
-	p2, playerCreationErr := createPlayer(nickname)
+	p2, playerCreationErr := createPlayer(client, nickname)
 	if playerCreationErr != nil {
 		fmt.Printf("Something went wrong creating player: %s", playerCreationErr)
 	}
