@@ -180,11 +180,13 @@ func handleCreateGameRoomMessage(client *Client, msg map[string]interface{}) {
 	client.hub.openGameRoom <- gameRoom
 
 	responseData := make(map[string]interface{})
-	responseData["id"] = gameRoom.id
+	responseData[messageDataRoomID] = gameRoom.id
+	responseData[messageDataPlayerID] = p1.ID
 	responseData[messageDataNickname] = nickname
 	response := message{MessageType: createGameRoomSuccessMessageType, Data: responseData}
 	// j, _ := json.Marshal(responseData)
 	// fmt.Printf("j: %v\n", j)
+	fmt.Printf("Creating game room response msg: %v\n", response)
 	json, err := json.Marshal(response)
 	if err != nil {
 		fmt.Printf("Something went wrong marshalling response to json, %s", err)
@@ -214,16 +216,29 @@ func handleEnterGameRoomMessage(client *Client, msg map[string]interface{}) {
 		room.addPlayer(p2)
 		fmt.Printf("from entering game room GameRoom: %v\n", room)
 		responseData := make(map[string]interface{})
-		responseData["id"] = room.id
+		responseData[messageDataRoomID] = room.id
+		responseData[messageDataPlayerID] = p2.ID
 		responseData[messageDataNickname] = nickname
+		responseData[messageDataPlayers] = room.players
 		response := message{enterGameRoomSuccessMessageType, responseData}
 
-		json, err := json.Marshal(response)
+		fmt.Printf("Entering game room response msg: %v\n", response)
+		jsonMessage, err := json.Marshal(response)
 		if err != nil {
 			fmt.Printf("Something went wrong marshalling response to json, %s", err)
 		}
-		client.send <- json
+		fmt.Printf("Entering game room JSON response msg: %s\n", jsonMessage)
+		client.send <- jsonMessage
 
+		otherResponseData := make(map[string]interface{})
+		otherResponseData[messageDataPlayers] = room.players
+		otherResponse := message{newPlayerJoinedGameRoomMessageType, otherResponseData}
+
+		otherJSON, err := json.Marshal(otherResponse)
+		if err != nil {
+			fmt.Printf("Something went wrong marshalling response to json, %s", err)
+		}
+		room.players[0].client.send <- otherJSON
 	} else {
 		fmt.Printf("Room does not exist\n")
 	}

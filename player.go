@@ -7,8 +7,8 @@ import (
 )
 
 type player struct {
-	id       uuid.UUID
-	nickname string
+	ID       string
+	Nickname string
 	client   *Client
 }
 
@@ -19,5 +19,5 @@ func createPlayer(client *Client, nickname string) (*player, error) {
 		return nil, err
 	}
 
-	return &player{playerID, nickname, client}, nil
+	return &player{playerID.String(), nickname, client}, nil
 }
