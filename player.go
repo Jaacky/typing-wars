@@ -7,8 +7,8 @@ import (
 )
 
 type player struct {
-	ID       string
-	Nickname string
+	ID       string `json:"id"`
+	Nickname string `json:"nickname"`
 	client   *Client
 }
 
