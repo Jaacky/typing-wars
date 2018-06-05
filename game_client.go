@@ -158,7 +158,7 @@ func (c *Client) writePump() {
 func (c *Client) ready(msg map[string]interface{}) {
 	msgData := msg[messageData].(map[string]interface{})
 	readyFlag := msgData[messageReadyFlag].(bool)
-
+	fmt.Printf("msgData: %v, readyFlag: %v\n", msgData, readyFlag)
 	fmt.Printf("Client ready toggle: %s - status: %v", c.player.Nickname, readyFlag)
 	c.room.readyStatus[c.ID] = readyFlag
 }
@@ -177,6 +177,7 @@ func (c *Client) createGameRoom(msg map[string]interface{}) {
 	}
 
 	c.player = p1
+	c.room = gameRoom
 	gameRoom.addClient(c)
 	c.hub.openGameRoom <- gameRoom
 
@@ -214,6 +215,7 @@ func (c *Client) enterGameRoom(msg map[string]interface{}) {
 	fmt.Printf("Game rooms: %v\n", c.hub.gameRooms)
 	if room, ok := c.hub.gameRooms[gameID]; ok {
 		c.player = p2
+		c.room = room
 		room.addClient(c)
 		fmt.Printf("from entering game room GameRoom: %v\n", room)
 		responseData := make(map[string]interface{})
