@@ -92,11 +92,11 @@ func (c *Client) readPump() {
 		fmt.Printf("Message received: %v\n", msg)
 		switch msg["MessageType"] {
 		case createGameRoomMessageType:
-			c.createGameRoomMessage(msg)
+			c.createGameRoom(msg)
 		case enterGameRoomMessageType:
-			c.enterGameRoomMessage(msg)
+			c.enterGameRoom(msg)
 		case playerReadyMessageType:
-			c.playerReady(msg)
+			c.ready(msg)
 		default:
 			fmt.Printf("Other message types: %v\n", msg["MessageType"])
 		}
@@ -155,22 +155,21 @@ func (c *Client) writePump() {
 	}
 }
 
-func (c *Client) playerReady(msg map[string]interface{}) {
+func (c *Client) ready(msg map[string]interface{}) {
 	msgData := msg[messageData].(map[string]interface{})
 	readyFlag := msgData[messageReadyFlag].(bool)
-	c.room.readyStatus[c.player.ID] = readyFlag
+
+	fmt.Printf("Client ready toggle: %s - status: %v", c.player.Nickname, readyFlag)
+	c.room.readyStatus[c.ID] = readyFlag
 }
 
-func (c *Client) createGameRoomMessage(msg map[string]interface{}) {
+func (c *Client) createGameRoom(msg map[string]interface{}) {
 	fmt.Printf("Message received - type is createGameRoom\n")
 
 	msgData := msg[messageData].(map[string]interface{})
 	nickname := msgData[messageDataNickname].(string)
 
-	p1, playerCreationErr := createPlayer(c, nickname)
-	if playerCreationErr != nil {
-		fmt.Printf("Something went wrong creating player: %s", playerCreationErr)
-	}
+	p1 := createPlayer(c.ID, nickname)
 
 	gameRoom, gameRoomCreationErr := createGameRoom()
 	if gameRoomCreationErr != nil {
@@ -198,7 +197,7 @@ func (c *Client) createGameRoomMessage(msg map[string]interface{}) {
 	c.send <- json
 }
 
-func (c *Client) enterGameRoomMessage(msg map[string]interface{}) {
+func (c *Client) enterGameRoom(msg map[string]interface{}) {
 	fmt.Printf("Message type is enterGameRoomMessageType\n")
 
 	msgData := msg[messageData].(map[string]interface{})
@@ -210,10 +209,8 @@ func (c *Client) enterGameRoomMessage(msg map[string]interface{}) {
 	// 	fmt.Printf("Somethign went wrong with getting UUID from string, %s\n", err)
 	// }
 
-	p2, playerCreationErr := createPlayer(c, nickname)
-	if playerCreationErr != nil {
-		fmt.Printf("Something went wrong creating player: %s", playerCreationErr)
-	}
+	p2 := createPlayer(c.ID, nickname)
+
 	fmt.Printf("Game rooms: %v\n", c.hub.gameRooms)
 	if room, ok := c.hub.gameRooms[gameID]; ok {
 		c.player = p2
