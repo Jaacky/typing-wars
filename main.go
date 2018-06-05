@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 )
@@ -26,7 +27,11 @@ func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}
+	// client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}
+	client, createClientErr := createClient(hub, conn)
+	if err != nil {
+		fmt.Printf("Something went wrong creating client: %s", createClientErr)
+	}
 	client.hub.register <- client
 
 	// Allow collection of memory referenced by the caller by doing all work in

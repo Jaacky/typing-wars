@@ -8,17 +8,26 @@ import (
 
 type gameRoom struct {
 	id          string
-	players     []*Player
+	clients     []*Client
 	readyStatus map[string]bool
 }
 
-func (g *gameRoom) addPlayer(p *Player) {
-	g.players = append(g.players, p)
-	g.readyStatus[p.ID] = false
+func (g *gameRoom) addClient(c *Client) {
+	g.clients = append(g.clients, c)
+	g.readyStatus[c.ID] = false
 }
 
-func (g *gameRoom) readyPlayer(p *Player, flag bool) {
-	g.readyStatus[p.ID] = flag
+func (g *gameRoom) readyClient(c *Client, flag bool) {
+	g.readyStatus[c.ID] = flag
+}
+
+func (g *gameRoom) getPlayers() []*Player {
+	players := make([]*Player, 0)
+	for _, client := range g.clients {
+		players = append(players, client.player)
+	}
+
+	return players
 }
 
 func createGameRoom() (*gameRoom, error) {
@@ -28,5 +37,5 @@ func createGameRoom() (*gameRoom, error) {
 		return nil, err
 	}
 	// fmt.Printf("UUIDv4: %s\n", gameID)
-	return &gameRoom{gameID.String(), make([]*Player, 0), make(map[string]bool)}, nil
+	return &gameRoom{gameID.String(), make([]*Client, 0), make(map[string]bool)}, nil
 }

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	uuid "github.com/satori/go.uuid"
 )
 
 const (
@@ -37,6 +38,7 @@ var upgrader = websocket.Upgrader{
 
 // Client is a middleman between the websocket connection and the hub.
 type Client struct {
+	ID  string
 	hub *Hub
 
 	// The websocket connection.
@@ -54,9 +56,14 @@ type message struct {
 	Data        interface{}
 }
 
-type registrationData struct {
-	id   int
-	name string
+func createClient(hub *Hub, conn *websocket.Conn) (*Client, error) {
+	clientID, err := uuid.NewV4()
+	if err != nil {
+		fmt.Printf("Something went wrong creating client UUID: %s", err)
+		return nil, err
+	}
+
+	return &Client{ID: clientID.String(), hub: hub, conn: conn, send: make(chan []byte, 256)}, nil
 }
 
 // readPump pumps messages from the websocket connection to the hub.
@@ -171,14 +178,14 @@ func (c *Client) createGameRoomMessage(msg map[string]interface{}) {
 	}
 
 	c.player = p1
-	gameRoom.addPlayer(p1)
+	gameRoom.addClient(c)
 	c.hub.openGameRoom <- gameRoom
 
 	responseData := make(map[string]interface{})
 	responseData[messageDataRoomID] = gameRoom.id
 	responseData[messageDataPlayerID] = p1.ID
 	responseData[messageDataNickname] = nickname
-	responseData[messageDataPlayers] = gameRoom.players
+	responseData[messageDataPlayers] = gameRoom.getPlayers()
 	response := message{MessageType: createGameRoomSuccessMessageType, Data: responseData}
 	// j, _ := json.Marshal(responseData)
 	// fmt.Printf("j: %v\n", j)
@@ -210,13 +217,13 @@ func (c *Client) enterGameRoomMessage(msg map[string]interface{}) {
 	fmt.Printf("Game rooms: %v\n", c.hub.gameRooms)
 	if room, ok := c.hub.gameRooms[gameID]; ok {
 		c.player = p2
-		room.addPlayer(p2)
+		room.addClient(c)
 		fmt.Printf("from entering game room GameRoom: %v\n", room)
 		responseData := make(map[string]interface{})
 		responseData[messageDataRoomID] = room.id
 		responseData[messageDataPlayerID] = p2.ID
 		responseData[messageDataNickname] = nickname
-		responseData[messageDataPlayers] = room.players
+		responseData[messageDataPlayers] = room.getPlayers()
 		response := message{enterGameRoomSuccessMessageType, responseData}
 
 		fmt.Printf("Entering game room response msg: %v\n", response)
@@ -228,14 +235,14 @@ func (c *Client) enterGameRoomMessage(msg map[string]interface{}) {
 		c.send <- jsonMessage
 
 		otherResponseData := make(map[string]interface{})
-		otherResponseData[messageDataPlayers] = room.players
+		otherResponseData[messageDataPlayers] = room.getPlayers()
 		otherResponse := message{newPlayerJoinedGameRoomMessageType, otherResponseData}
 
 		otherJSON, err := json.Marshal(otherResponse)
 		if err != nil {
 			fmt.Printf("Something went wrong marshalling response to json, %s", err)
 		}
-		room.players[0].client.send <- otherJSON
+		room.clients[0].send <- otherJSON
 	} else {
 		fmt.Printf("Room does not exist\n")
 	}
