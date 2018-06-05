@@ -44,6 +44,9 @@ type Client struct {
 
 	// Buffered channel of outbound messages.
 	send chan []byte
+
+	player *Player
+	room   *gameRoom
 }
 
 type message struct {
@@ -82,9 +85,11 @@ func (c *Client) readPump() {
 		fmt.Printf("Message received: %v\n", msg)
 		switch msg["MessageType"] {
 		case createGameRoomMessageType:
-			handleCreateGameRoomMessage(c, msg)
+			c.createGameRoomMessage(msg)
 		case enterGameRoomMessageType:
-			handleEnterGameRoomMessage(c, msg)
+			c.enterGameRoomMessage(msg)
+		case playerReadyMessageType:
+			c.playerReady(msg)
 		default:
 			fmt.Printf("Other message types: %v\n", msg["MessageType"])
 		}
@@ -143,30 +148,19 @@ func (c *Client) writePump() {
 	}
 }
 
-// serveWs handles websocket requests from the peer.
-func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}
-	client.hub.register <- client
-
-	// Allow collection of memory referenced by the caller by doing all work in
-	// new goroutines.
-	go client.writePump()
-	go client.readPump()
+func (c *Client) playerReady(msg map[string]interface{}) {
+	msgData := msg[messageData].(map[string]interface{})
+	readyFlag := msgData[messageReadyFlag].(bool)
+	c.room.readyStatus[c.player.ID] = readyFlag
 }
 
-func handleCreateGameRoomMessage(client *Client, msg map[string]interface{}) {
+func (c *Client) createGameRoomMessage(msg map[string]interface{}) {
 	fmt.Printf("Message received - type is createGameRoom\n")
 
 	msgData := msg[messageData].(map[string]interface{})
 	nickname := msgData[messageDataNickname].(string)
 
-	p1, playerCreationErr := createPlayer(client, nickname)
+	p1, playerCreationErr := createPlayer(c, nickname)
 	if playerCreationErr != nil {
 		fmt.Printf("Something went wrong creating player: %s", playerCreationErr)
 	}
@@ -176,13 +170,15 @@ func handleCreateGameRoomMessage(client *Client, msg map[string]interface{}) {
 		fmt.Printf("Something went wrong creating game room: %s", gameRoomCreationErr)
 	}
 
+	c.player = p1
 	gameRoom.addPlayer(p1)
-	client.hub.openGameRoom <- gameRoom
+	c.hub.openGameRoom <- gameRoom
 
 	responseData := make(map[string]interface{})
 	responseData[messageDataRoomID] = gameRoom.id
 	responseData[messageDataPlayerID] = p1.ID
 	responseData[messageDataNickname] = nickname
+	responseData[messageDataPlayers] = gameRoom.players
 	response := message{MessageType: createGameRoomSuccessMessageType, Data: responseData}
 	// j, _ := json.Marshal(responseData)
 	// fmt.Printf("j: %v\n", j)
@@ -192,10 +188,10 @@ func handleCreateGameRoomMessage(client *Client, msg map[string]interface{}) {
 		fmt.Printf("Something went wrong marshalling response to json, %s", err)
 	}
 	// fmt.Printf("about to send json after creating game room: JSON: %v, response: %v\n", json, response)
-	client.send <- json
+	c.send <- json
 }
 
-func handleEnterGameRoomMessage(client *Client, msg map[string]interface{}) {
+func (c *Client) enterGameRoomMessage(msg map[string]interface{}) {
 	fmt.Printf("Message type is enterGameRoomMessageType\n")
 
 	msgData := msg[messageData].(map[string]interface{})
@@ -207,12 +203,13 @@ func handleEnterGameRoomMessage(client *Client, msg map[string]interface{}) {
 	// 	fmt.Printf("Somethign went wrong with getting UUID from string, %s\n", err)
 	// }
 
-	p2, playerCreationErr := createPlayer(client, nickname)
+	p2, playerCreationErr := createPlayer(c, nickname)
 	if playerCreationErr != nil {
 		fmt.Printf("Something went wrong creating player: %s", playerCreationErr)
 	}
-	fmt.Printf("Game rooms: %v\n", client.hub.gameRooms)
-	if room, ok := client.hub.gameRooms[gameID]; ok {
+	fmt.Printf("Game rooms: %v\n", c.hub.gameRooms)
+	if room, ok := c.hub.gameRooms[gameID]; ok {
+		c.player = p2
 		room.addPlayer(p2)
 		fmt.Printf("from entering game room GameRoom: %v\n", room)
 		responseData := make(map[string]interface{})
@@ -228,7 +225,7 @@ func handleEnterGameRoomMessage(client *Client, msg map[string]interface{}) {
 			fmt.Printf("Something went wrong marshalling response to json, %s", err)
 		}
 		fmt.Printf("Entering game room JSON response msg: %s\n", jsonMessage)
-		client.send <- jsonMessage
+		c.send <- jsonMessage
 
 		otherResponseData := make(map[string]interface{})
 		otherResponseData[messageDataPlayers] = room.players

@@ -7,12 +7,18 @@ import (
 )
 
 type gameRoom struct {
-	id      string
-	players []*player
+	id          string
+	players     []*Player
+	readyStatus map[string]bool
 }
 
-func (g *gameRoom) addPlayer(p *player) {
+func (g *gameRoom) addPlayer(p *Player) {
 	g.players = append(g.players, p)
+	g.readyStatus[p.ID] = false
+}
+
+func (g *gameRoom) readyPlayer(p *Player, flag bool) {
+	g.readyStatus[p.ID] = flag
 }
 
 func createGameRoom() (*gameRoom, error) {
@@ -22,5 +28,5 @@ func createGameRoom() (*gameRoom, error) {
 		return nil, err
 	}
 	// fmt.Printf("UUIDv4: %s\n", gameID)
-	return &gameRoom{gameID.String(), make([]*player, 0)}, nil
+	return &gameRoom{gameID.String(), make([]*Player, 0), make(map[string]bool)}, nil
 }
