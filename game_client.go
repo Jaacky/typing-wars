@@ -160,7 +160,26 @@ func (c *Client) ready(msg map[string]interface{}) {
 	readyFlag := msgData[messageReadyFlag].(bool)
 	fmt.Printf("msgData: %v, readyFlag: %v\n", msgData, readyFlag)
 	fmt.Printf("Client ready toggle: %s - status: %v", c.player.Nickname, readyFlag)
-	c.room.readyStatus[c.ID] = readyFlag
+
+	// otherClients := c.room.getOtherClients(c.ID)
+	otherClients := c.room.getClients()
+	fmt.Printf("Other clients: %v, len: %v, cap: %v\n", otherClients, len(otherClients), cap(otherClients))
+
+	if len(otherClients) != 0 {
+		c.room.readyStatus[c.ID] = readyFlag
+		for _, client := range otherClients {
+			responseData := make(map[string]interface{})
+			responseData[messageDataPlayerID] = c.ID
+			responseData[messageReadyFlag] = readyFlag
+			response := message{MessageType: otherPlayersReadyMessageType, Data: responseData}
+			fmt.Printf("Ready res message: %v\n", response)
+			json, err := json.Marshal(response)
+			if err != nil {
+				fmt.Printf("Something went wrong marshalling response to json, %s", err)
+			}
+			client.send <- json
+		}
+	}
 }
 
 func (c *Client) createGameRoom(msg map[string]interface{}) {

@@ -30,6 +30,26 @@ func (g *gameRoom) getPlayers() []*Player {
 	return players
 }
 
+func (g *gameRoom) getClients() []*Client {
+	clients := make([]*Client, 0)
+	for _, client := range g.clients {
+		clients = append(clients, client)
+	}
+
+	return clients
+}
+
+func (g *gameRoom) getOtherClients(id string) []*Client {
+	otherClients := make([]*Client, 0)
+	for _, client := range g.clients {
+		if client.ID != id {
+			otherClients = append(otherClients, client)
+		}
+	}
+
+	return otherClients
+}
+
 func createGameRoom() (*gameRoom, error) {
 	gameID, err := uuid.NewV4()
 	if err != nil {

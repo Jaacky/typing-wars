@@ -7,6 +7,7 @@ const (
 	enterGameRoomSuccessMessageType    = "ENTER_GAME_ROOM_SUCCESS"
 	newPlayerJoinedGameRoomMessageType = "NEW_PLAYER_JOINED"
 	playerReadyMessageType             = "PLAYER_READY"
+	otherPlayersReadyMessageType       = "OTHER_PLAYERS_READY"
 
 	messageData         = "Data"
 	messageDataNickname = "nickname"
