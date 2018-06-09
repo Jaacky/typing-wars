@@ -162,12 +162,13 @@ func (c *Client) ready(msg map[string]interface{}) {
 	fmt.Printf("Client ready toggle: %s - status: %v", c.player.Nickname, readyFlag)
 
 	// otherClients := c.room.getOtherClients(c.ID)
-	otherClients := c.room.getClients()
+	otherClients := c.room.getOtherClients(c.ID)
+	clients := c.room.getClients()
 	fmt.Printf("Other clients: %v, len: %v, cap: %v\n", otherClients, len(otherClients), cap(otherClients))
 
 	if len(otherClients) != 0 {
 		c.room.readyStatus[c.ID] = readyFlag
-		for _, client := range otherClients {
+		for _, client := range clients {
 			responseData := make(map[string]interface{})
 			responseData[messageDataPlayerID] = c.ID
 			responseData[messageReadyFlag] = readyFlag
