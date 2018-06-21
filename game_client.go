@@ -167,11 +167,13 @@ func (c *Client) ready(msg map[string]interface{}) {
 	fmt.Printf("Other clients: %v, len: %v, cap: %v\n", otherClients, len(otherClients), cap(otherClients))
 
 	if len(otherClients) != 0 {
-		c.room.readyStatus[c.ID] = readyFlag
+		readyStatus := c.room.readyStatus
+		readyStatus[c.ID] = readyFlag
 		for _, client := range clients {
 			responseData := make(map[string]interface{})
 			responseData[messageDataPlayerID] = c.ID
 			responseData[messageReadyFlag] = readyFlag
+			responseData[messageReadyStatus] = readyStatus
 			response := message{MessageType: otherPlayersReadyMessageType, Data: responseData}
 			fmt.Printf("Ready res message: %v\n", response)
 			json, err := json.Marshal(response)
@@ -206,6 +208,8 @@ func (c *Client) createGameRoom(msg map[string]interface{}) {
 	responseData[messageDataPlayerID] = p1.ID
 	responseData[messageDataNickname] = nickname
 	responseData[messageDataPlayers] = gameRoom.getPlayers()
+	responseData[messageReadyStatus] = gameRoom.readyStatus
+	responseData[messageCanStart] = false
 	response := message{MessageType: createGameRoomSuccessMessageType, Data: responseData}
 	// j, _ := json.Marshal(responseData)
 	// fmt.Printf("j: %v\n", j)
@@ -243,6 +247,8 @@ func (c *Client) enterGameRoom(msg map[string]interface{}) {
 		responseData[messageDataPlayerID] = p2.ID
 		responseData[messageDataNickname] = nickname
 		responseData[messageDataPlayers] = room.getPlayers()
+		responseData[messageReadyStatus] = room.readyStatus
+		responseData[messageCanStart] = false
 		response := message{enterGameRoomSuccessMessageType, responseData}
 
 		fmt.Printf("Entering game room response msg: %v\n", response)
@@ -255,6 +261,7 @@ func (c *Client) enterGameRoom(msg map[string]interface{}) {
 
 		otherResponseData := make(map[string]interface{})
 		otherResponseData[messageDataPlayers] = room.getPlayers()
+		otherResponseData[messageReadyStatus] = room.readyStatus
 		otherResponse := message{newPlayerJoinedGameRoomMessageType, otherResponseData}
 
 		otherJSON, err := json.Marshal(otherResponse)

@@ -15,4 +15,6 @@ const (
 	messageDataRoomID   = "roomID"
 	messageDataPlayers  = "players"
 	messageReadyFlag    = "readyFlag"
+	messageReadyStatus  = "readyStatus"
+	messageCanStart     = "canStart"
 )
