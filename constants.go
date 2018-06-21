@@ -16,5 +16,5 @@ const (
 	messageDataPlayers  = "players"
 	messageReadyFlag    = "readyFlag"
 	messageReadyStatus  = "readyStatus"
-	messageCanStart     = "canStart"
+	messageStartFlag    = "startFlag"
 )

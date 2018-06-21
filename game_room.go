@@ -50,6 +50,17 @@ func (g *gameRoom) getOtherClients(id string) []*Client {
 	return otherClients
 }
 
+func (g *gameRoom) getStartFlag() bool {
+	startFlag := true
+
+	for key, status := range g.readyStatus {
+		fmt.Printf("ready status iteration, key: %v, status: %v\n", key, status)
+		startFlag = status && startFlag
+	}
+
+	return startFlag
+}
+
 func createGameRoom() (*gameRoom, error) {
 	gameID, err := uuid.NewV4()
 	if err != nil {

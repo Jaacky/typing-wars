@@ -161,19 +161,22 @@ func (c *Client) ready(msg map[string]interface{}) {
 	fmt.Printf("msgData: %v, readyFlag: %v\n", msgData, readyFlag)
 	fmt.Printf("Client ready toggle: %s - status: %v", c.player.Nickname, readyFlag)
 
-	// otherClients := c.room.getOtherClients(c.ID)
-	otherClients := c.room.getOtherClients(c.ID)
-	clients := c.room.getClients()
+	gameRoom := c.room
+	otherClients := gameRoom.getOtherClients(c.ID)
+	clients := gameRoom.getClients()
 	fmt.Printf("Other clients: %v, len: %v, cap: %v\n", otherClients, len(otherClients), cap(otherClients))
 
 	if len(otherClients) != 0 {
-		readyStatus := c.room.readyStatus
+		readyStatus := gameRoom.readyStatus
 		readyStatus[c.ID] = readyFlag
+		startFlag := gameRoom.getStartFlag()
+		fmt.Printf("start flag: %v\n", startFlag)
 		for _, client := range clients {
 			responseData := make(map[string]interface{})
 			responseData[messageDataPlayerID] = c.ID
 			responseData[messageReadyFlag] = readyFlag
 			responseData[messageReadyStatus] = readyStatus
+			responseData[messageStartFlag] = startFlag
 			response := message{MessageType: otherPlayersReadyMessageType, Data: responseData}
 			fmt.Printf("Ready res message: %v\n", response)
 			json, err := json.Marshal(response)
@@ -209,7 +212,7 @@ func (c *Client) createGameRoom(msg map[string]interface{}) {
 	responseData[messageDataNickname] = nickname
 	responseData[messageDataPlayers] = gameRoom.getPlayers()
 	responseData[messageReadyStatus] = gameRoom.readyStatus
-	responseData[messageCanStart] = false
+	responseData[messageStartFlag] = false
 	response := message{MessageType: createGameRoomSuccessMessageType, Data: responseData}
 	// j, _ := json.Marshal(responseData)
 	// fmt.Printf("j: %v\n", j)
@@ -248,7 +251,7 @@ func (c *Client) enterGameRoom(msg map[string]interface{}) {
 		responseData[messageDataNickname] = nickname
 		responseData[messageDataPlayers] = room.getPlayers()
 		responseData[messageReadyStatus] = room.readyStatus
-		responseData[messageCanStart] = false
+		responseData[messageStartFlag] = false
 		response := message{enterGameRoomSuccessMessageType, responseData}
 
 		fmt.Printf("Entering game room response msg: %v\n", response)
