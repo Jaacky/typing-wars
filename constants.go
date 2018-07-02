@@ -8,6 +8,8 @@ const (
 	newPlayerJoinedGameRoomMessageType = "NEW_PLAYER_JOINED"
 	playerReadyMessageType             = "PLAYER_READY"
 	otherPlayersReadyMessageType       = "OTHER_PLAYERS_READY"
+	startGameMessageType               = "START_GAME"
+	gameBeginMessageType               = "GAME_BEGIN"
 
 	messageData         = "Data"
 	messageDataNickname = "nickname"

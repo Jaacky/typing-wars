@@ -97,6 +97,8 @@ func (c *Client) readPump() {
 			c.enterGameRoom(msg)
 		case playerReadyMessageType:
 			c.ready(msg)
+		case startGameMessageType:
+			c.room.startGame()
 		default:
 			fmt.Printf("Other message types: %v\n", msg["MessageType"])
 		}

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 
 	uuid "github.com/satori/go.uuid"
@@ -61,12 +62,26 @@ func (g *gameRoom) getStartFlag() bool {
 	return startFlag
 }
 
+func (g *gameRoom) startGame() {
+	if g.getStartFlag() {
+		response := message{MessageType: gameBeginMessageType}
+		json, err := json.Marshal(response)
+		if err != nil {
+			fmt.Printf("Something went wrong marshalling response to json in start game, %s", err)
+		}
+
+		for _, client := range g.clients {
+			client.send <- json
+		}
+	}
+}
+
 func createGameRoom() (*gameRoom, error) {
 	gameID, err := uuid.NewV4()
 	if err != nil {
 		fmt.Printf("Something went wrong: %s", err)
 		return nil, err
 	}
-	// fmt.Printf("UUIDv4: %s\n", gameID)
+
 	return &gameRoom{gameID.String(), make([]*Client, 0), make(map[string]bool)}, nil
 }
