@@ -11,6 +11,7 @@ type gameRoom struct {
 	id          string
 	clients     []*Client
 	readyStatus map[string]bool
+	game        *Game
 }
 
 func (g *gameRoom) addClient(c *Client) {
@@ -64,7 +65,12 @@ func (g *gameRoom) getStartFlag() bool {
 
 func (g *gameRoom) startGame() {
 	if g.getStartFlag() {
-		response := message{MessageType: gameBeginMessageType}
+		fmt.Println("Starting game")
+		game := NewGame(g.clients)
+		g.game = game
+
+		// Wrap game with constant key:value
+		response := message{MessageType: gameBeginMessageType, Data: game}
 		json, err := json.Marshal(response)
 		if err != nil {
 			fmt.Printf("Something went wrong marshalling response to json in start game, %s", err)
@@ -73,6 +79,8 @@ func (g *gameRoom) startGame() {
 		for _, client := range g.clients {
 			client.send <- json
 		}
+
+		g.game.start()
 	}
 }
 
@@ -83,5 +91,5 @@ func createGameRoom() (*gameRoom, error) {
 		return nil, err
 	}
 
-	return &gameRoom{gameID.String(), make([]*Client, 0), make(map[string]bool)}, nil
+	return &gameRoom{id: gameID.String(), clients: make([]*Client, 0), readyStatus: make(map[string]bool)}, nil
 }

@@ -90,7 +90,7 @@ func (c *Client) readPump() {
 			break
 		}
 		fmt.Printf("Message received: %v\n", msg)
-		switch msg["MessageType"] {
+		switch msg[messageType] {
 		case createGameRoomMessageType:
 			c.createGameRoom(msg)
 		case enterGameRoomMessageType:
@@ -99,6 +99,9 @@ func (c *Client) readPump() {
 			c.ready(msg)
 		case startGameMessageType:
 			c.room.startGame()
+		case gameEventType:
+			c.handleGameEvent(msg)
+			fmt.Printf("Game Event recevied: %v\n", msg)
 		default:
 			fmt.Printf("Other message types: %v\n", msg["MessageType"])
 		}
@@ -154,6 +157,16 @@ func (c *Client) writePump() {
 				return
 			}
 		}
+	}
+}
+
+func (c *Client) handleGameEvent(msg map[string]interface{}) {
+	msgData := msg[messageData].(map[string]interface{})
+	switch msgData[messageDataType] {
+	case keyPressType:
+		fmt.Printf("Game event - Key pressed: %s\n", msgData[messageDataKey])
+	default:
+		fmt.Printf("Game event - other type: %v\n", msgData)
 	}
 }
 

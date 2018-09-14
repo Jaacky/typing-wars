@@ -10,8 +10,13 @@ const (
 	otherPlayersReadyMessageType       = "OTHER_PLAYERS_READY"
 	startGameMessageType               = "START_GAME"
 	gameBeginMessageType               = "GAME_BEGIN"
+	gameEventType                      = "GAME_EVENT"
+	keyPressType                       = "KEY_PRESS"
 
 	messageData         = "Data"
+	messageType         = "MessageType"
+	messageDataType     = "type"
+	messageDataKey      = "key"
 	messageDataNickname = "nickname"
 	messageDataPlayerID = "playerID"
 	messageDataRoomID   = "roomID"
