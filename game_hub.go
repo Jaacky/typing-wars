@@ -42,6 +42,10 @@ func (h *Hub) run() {
 		select {
 		case client := <-h.register:
 			h.clients[client] = true
+			// Allow collection of memory referenced by the caller by doing all work in
+			// new goroutines.
+			go client.writePump()
+			go client.readPump()
 		case client := <-h.unregister:
 			if _, ok := h.clients[client]; ok {
 				delete(h.clients, client)

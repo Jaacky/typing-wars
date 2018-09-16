@@ -92,15 +92,15 @@ func (c *Client) readPump() {
 		fmt.Printf("Message received: %v\n", msg)
 		switch msg[messageType] {
 		case createGameRoomMessageType:
-			c.createGameRoom(msg)
+			go c.createGameRoom(msg)
 		case enterGameRoomMessageType:
-			c.enterGameRoom(msg)
+			go c.enterGameRoom(msg)
 		case playerReadyMessageType:
-			c.ready(msg)
+			go c.ready(msg)
 		case startGameMessageType:
-			c.room.startGame()
+			go c.room.startGame()
 		case gameEventType:
-			c.handleGameEvent(msg)
+			go c.handleGameEvent(msg)
 			fmt.Printf("Game Event recevied: %v\n", msg)
 		default:
 			fmt.Printf("Other message types: %v\n", msg["MessageType"])
