@@ -20,7 +20,7 @@ func NewUnitSpawner(dispatcher *events.EventDispatcher) *UnitSpawner {
 
 func (spawner *UnitSpawner) Run() {
 	for range time.Tick(constants.UnitSpawningInterval) {
-		unit := state.NewUnit()
+		unit := state.NewUnit("hello world", 1, 1)
 		event := &events.UnitSpawned{
 			Unit: unit,
 		}

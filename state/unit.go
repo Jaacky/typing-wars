@@ -9,6 +9,12 @@ type Unit struct {
 	Typed    uint32
 }
 
-func NewUnit() *Unit {
-	return &Unit{}
+func NewUnit(word string, x uint32, y uint32) *Unit {
+	return &Unit{
+		UnitSize: 3,
+		X:        x,
+		Y:        y,
+		Word:     word,
+		Typed:    0,
+	}
 }
