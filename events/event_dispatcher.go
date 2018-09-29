@@ -13,6 +13,21 @@ type eventHandler interface {
 	handle()
 }
 
+type TimeTickEventListener interface {
+	handleTimeTick(*TimeTick)
+}
+
+type timeTickHandler struct {
+	event          *TimeTick
+	eventListeners []TimeTickEventListener
+}
+
+func (handler *timeTickHandler) handle() {
+	for _, listener := range handler.eventListeners {
+		listener.handleTimeTick(handler.event)
+	}
+}
+
 type UnitSpawnedEventListener interface {
 	handleUnitSpawned(*UnitSpawned)
 }
@@ -33,6 +48,8 @@ type EventDispatcher struct {
 	running bool
 
 	eventQueue chan eventHandler
+
+	timeTickListeners []TimeTickEventListener
 }
 
 // NewEventDispatcher comment
@@ -55,4 +72,14 @@ func (dispatcher *EventDispatcher) RunEventLoop() {
 			time.Sleep(idleDispatcherTime)
 		}
 	}
+}
+
+// FireTimeTick function
+func (dispatcher *EventDispatcher) FireTimeTick(timeTick *TimeTick) {
+	handler := &timeTickHandler{
+		event:          timeTick,
+		eventListeners: dispatcher.timeTickListeners,
+	}
+
+	dispatcher.eventQueue <- handler
 }
