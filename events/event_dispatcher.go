@@ -13,13 +13,13 @@ type eventHandler interface {
 	handle()
 }
 
-type TimeTickEventListener interface {
+type TimeTickListener interface {
 	HandleTimeTick(*TimeTick)
 }
 
 type timeTickHandler struct {
 	event          *TimeTick
-	eventListeners []TimeTickEventListener
+	eventListeners []TimeTickListener
 }
 
 func (handler *timeTickHandler) handle() {
@@ -28,18 +28,18 @@ func (handler *timeTickHandler) handle() {
 	}
 }
 
-type UnitSpawnedEventListener interface {
-	handleUnitSpawned(*UnitSpawned)
+type UnitSpawnedListener interface {
+	HandleUnitSpawned(*UnitSpawned)
 }
 
-type UnitSpawnedHandler struct {
+type unitSpawnedHandler struct {
 	event          *UnitSpawned
-	eventListeners []UnitSpawnedEventListener
+	eventListeners []UnitSpawnedListener
 }
 
-func (handler *UnitSpawnedHandler) handle() {
+func (handler *unitSpawnedHandler) handle() {
 	for _, listener := range handler.eventListeners {
-		listener.handleUnitSpawned(handler.event)
+		listener.HandleUnitSpawned(handler.event)
 	}
 }
 
@@ -49,15 +49,17 @@ type EventDispatcher struct {
 
 	eventQueue chan eventHandler
 
-	timeTickListeners []TimeTickEventListener
+	timeTickListeners    []TimeTickListener
+	unitSpawnedListeners []UnitSpawnedListener
 }
 
 // NewEventDispatcher comment
 func NewEventDispatcher() *EventDispatcher {
 	return &EventDispatcher{
-		running:           false,
-		eventQueue:        make(chan eventHandler),
-		timeTickListeners: []TimeTickEventListener{},
+		running:              false,
+		eventQueue:           make(chan eventHandler),
+		timeTickListeners:    []TimeTickListener{},
+		unitSpawnedListeners: []UnitSpawnedListener{},
 	}
 }
 
@@ -75,7 +77,7 @@ func (dispatcher *EventDispatcher) RunEventLoop() {
 	}
 }
 
-func (dispatcher *EventDispatcher) RegisterTimeTickListener(listener TimeTickEventListener) {
+func (dispatcher *EventDispatcher) RegisterTimeTickListener(listener TimeTickListener) {
 	dispatcher.timeTickListeners = append(dispatcher.timeTickListeners, listener)
 }
 
@@ -84,6 +86,19 @@ func (dispatcher *EventDispatcher) FireTimeTick(timeTick *TimeTick) {
 	handler := &timeTickHandler{
 		event:          timeTick,
 		eventListeners: dispatcher.timeTickListeners,
+	}
+
+	dispatcher.eventQueue <- handler
+}
+
+func (dispatcher *EventDispatcher) RegisterUnitSpawnedListener(listener UnitSpawnedListener) {
+	dispatcher.unitSpawnedListeners = append(dispatcher.unitSpawnedListeners, listener)
+}
+
+func (dispatcher *EventDispatcher) FireUnitSpawned(event *UnitSpawned) {
+	handler := &unitSpawnedHandler{
+		event:          event,
+		eventListeners: dispatcher.unitSpawnedListeners,
 	}
 
 	dispatcher.eventQueue <- handler

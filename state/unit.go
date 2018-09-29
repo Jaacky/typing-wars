@@ -8,3 +8,7 @@ type Unit struct {
 	Word     string
 	Typed    uint32
 }
+
+func NewUnit() *Unit {
+	return &Unit{}
+}
