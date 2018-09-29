@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"github.com/Jaacky/typing-wars/events"
+	"github.com/Jaacky/typing-wars/game"
+)
 
 type baseBuilding struct {
 	Owner    string
@@ -16,15 +19,15 @@ type unit struct {
 	Remains string
 }
 
-// type playerUnits struct {
-// 	Units map[string]*unit
-// }
-
 // Game strcut
 type Game struct {
-	Clients []*Client
-	Bases   map[string]*baseBuilding
-	Units   map[string]*map[string]*unit // { ClientID: { Word: Unit } ... }
+	Clients         []*Client
+	Bases           map[string]*baseBuilding
+	Units           map[string]*map[string]*unit // { ClientID: { Word: Unit } ... }
+	InGame          bool
+	EventDispatcher *events.EventDispatcher
+	physicsTicker   *game.PhysicsTicker
+	unitSpawner     *game.UnitSpawner
 }
 
 // NewGame struct
@@ -45,32 +48,30 @@ func NewGame(clients []*Client) *Game {
 
 		base := &baseBuilding{Owner: client.ID, Hp: 50, Colour: "#000", Position: position}
 		bases[client.ID] = base
-		// bases = append(bases, base)
 
 		pUnits := make(map[string]*unit)
 		units[client.ID] = &pUnits
 	}
 
-	return &Game{Bases: bases, Units: units, Clients: clients}
+	eventDispatcher := events.NewEventDispatcher()
+	physicsTicker := game.NewPhysicsTicker(eventDispatcher)
+	unitSpawner := game.NewUnitSpawner(eventDispatcher)
+
+	updater := game.NewUpdater()
+	eventDispatcher.RegisterTimeTickListener(updater)
+
+	return &Game{
+		Bases:           bases,
+		Units:           units,
+		Clients:         clients,
+		EventDispatcher: eventDispatcher,
+		physicsTicker:   physicsTicker,
+		unitSpawner:     unitSpawner,
+	}
 }
 
 func (g *Game) start() {
-	g.spawnUnits()
-	fmt.Println("Game started")
-	fmt.Printf("Units are: %v\n", g.Units)
-	for i := 0; i < len(g.Clients); i++ {
-		client := g.Clients[i]
-		cID := client.ID
-		fmt.Printf("\tClient: %v has units: %v\n", cID, g.Units[cID])
-	}
-}
-
-func (g *Game) spawnUnits() {
-	for i := 0; i < len(g.Clients); i++ {
-		client := g.Clients[i]
-		cID := client.ID
-		word := "helloworld"
-		u := &unit{Owner: cID, Word: word, Typed: "", Remains: word}
-		(*g.Units[cID])[word] = u
-	}
+	go g.EventDispatcher.RunEventLoop()
+	go g.physicsTicker.Run()
+	go g.unitSpawner.Run()
 }
