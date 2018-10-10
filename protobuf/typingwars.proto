@@ -1,0 +1,14 @@
+syntax = "proto3";
+package typingwars;
+option go_package = "pb";
+
+message Message {
+    oneof content {
+        PlayerJoined playerJoined = 1;
+    }
+}
+
+message PlayerJoined {
+    string id = 1;
+    string username = 2;
+}
