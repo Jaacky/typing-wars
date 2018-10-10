@@ -2,6 +2,7 @@ package communication
 
 import (
 	"log"
+	"strings"
 	"time"
 
 	"github.com/Jaacky/typing-wars/pb"
@@ -33,13 +34,14 @@ var (
 type Client struct {
 	ID   uuid.UUID
 	Conn *websocket.Conn
+	Room *Room
 
 	// Buffered channel of outbound messages.
 	send chan []byte
 	done chan bool
 }
 
-func NewClient(conn *websocket.Conn) *Client {
+func NewClient(conn *websocket.Conn, room *Room) *Client {
 	id, err := uuid.NewV4()
 	if err != nil {
 		log.Fatalf("Failed to generate uuid: %v", err)
@@ -48,6 +50,7 @@ func NewClient(conn *websocket.Conn) *Client {
 	return &Client{
 		ID:   id,
 		Conn: conn,
+		Room: room,
 		send: make(chan []byte, 256),
 		done: make(chan bool),
 	}
@@ -153,9 +156,17 @@ func (client *Client) unmarshalUserMessage(data []byte) {
 		log.Println("UserMessage - UserAction")
 	case *pb.UserMessage_JoinGame:
 		log.Println("UserMessage - JoinGame")
+	case *pb.UserMessage_RegisterPlayer:
+		log.Println("UserMessage - RegisterPlayer")
+		client.tryToRegisterPlayer(userMessage.GetRegisterPlayer())
 	default:
 		log.Printf("Unknown message type %T\n", userMessageType)
 	}
+}
+
+func (client *Client) tryToRegisterPlayer(registerPlayerMsg *pb.RegisterPlayer) {
+	username := strings.TrimSpace(registerPlayerMsg.Username)
+	log.Printf("Registering player: %s\n", username)
 }
 
 func (client *Client) SendMessage(message string) {

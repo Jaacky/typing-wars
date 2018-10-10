@@ -1,16 +1,15 @@
-package supervisor
+package communication
 
 import (
 	"fmt"
 	"log"
 
-	"github.com/Jaacky/typing-wars/communication"
 	"github.com/gofrs/uuid"
 )
 
 type Room struct {
 	ID      uuid.UUID
-	clients map[uuid.UUID]*communication.Client
+	clients map[uuid.UUID]*Client
 }
 
 func NewRoom() *Room {
@@ -21,11 +20,11 @@ func NewRoom() *Room {
 
 	return &Room{
 		ID:      id,
-		clients: make(map[uuid.UUID]*communication.Client),
+		clients: make(map[uuid.UUID]*Client),
 	}
 }
 
-func (room *Room) addClient(client *communication.Client) {
+func (room *Room) addClient(client *Client) {
 	room.clients[client.ID] = client
 	room.SendToAllClients(fmt.Sprintf("Player %d has joined the game\n", client.ID))
 }

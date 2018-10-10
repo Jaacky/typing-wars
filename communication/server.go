@@ -1,11 +1,10 @@
-package supervisor
+package communication
 
 import (
 	"html/template"
 	"log"
 	"net/http"
 
-	"github.com/Jaacky/typing-wars/communication"
 	"github.com/gofrs/uuid"
 	"github.com/gorilla/websocket"
 )
@@ -44,7 +43,7 @@ func (server *Server) Listen() {
 		room := NewRoom()
 		server.addRoom(room)
 
-		client := communication.NewClient(conn)
+		client := NewClient(conn, room)
 		room.addClient(client)
 
 		client.Listen()
@@ -67,7 +66,7 @@ func (server *Server) Listen() {
 		}
 		room, ok := server.rooms[roomID]
 		if ok {
-			client := communication.NewClient(conn)
+			client := NewClient(conn, room)
 			room.addClient(client)
 
 			client.Listen()
