@@ -20,6 +20,28 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
+type UserInput int32
+
+const (
+	UserInput_KEY UserInput = 0
+)
+
+var UserInput_name = map[int32]string{
+	0: "KEY",
+}
+
+var UserInput_value = map[string]int32{
+	"KEY": 0,
+}
+
+func (x UserInput) String() string {
+	return proto.EnumName(UserInput_name, int32(x))
+}
+
+func (UserInput) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_1b666822ed8f2be0, []int{0}
+}
+
 type Message struct {
 	// Types that are valid to be assigned to Content:
 	//	*Message_PlayerJoined
@@ -180,15 +202,243 @@ func (m *PlayerJoined) GetUsername() string {
 	return ""
 }
 
+type UserAction struct {
+	UserInput            UserInput `protobuf:"varint,1,opt,name=userInput,proto3,enum=typingwars.UserInput" json:"userInput,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}  `json:"-"`
+	XXX_unrecognized     []byte    `json:"-"`
+	XXX_sizecache        int32     `json:"-"`
+}
+
+func (m *UserAction) Reset()         { *m = UserAction{} }
+func (m *UserAction) String() string { return proto.CompactTextString(m) }
+func (*UserAction) ProtoMessage()    {}
+func (*UserAction) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1b666822ed8f2be0, []int{2}
+}
+
+func (m *UserAction) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_UserAction.Unmarshal(m, b)
+}
+func (m *UserAction) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_UserAction.Marshal(b, m, deterministic)
+}
+func (m *UserAction) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UserAction.Merge(m, src)
+}
+func (m *UserAction) XXX_Size() int {
+	return xxx_messageInfo_UserAction.Size(m)
+}
+func (m *UserAction) XXX_DiscardUnknown() {
+	xxx_messageInfo_UserAction.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UserAction proto.InternalMessageInfo
+
+func (m *UserAction) GetUserInput() UserInput {
+	if m != nil {
+		return m.UserInput
+	}
+	return UserInput_KEY
+}
+
+type JoinGame struct {
+	Username             string   `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *JoinGame) Reset()         { *m = JoinGame{} }
+func (m *JoinGame) String() string { return proto.CompactTextString(m) }
+func (*JoinGame) ProtoMessage()    {}
+func (*JoinGame) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1b666822ed8f2be0, []int{3}
+}
+
+func (m *JoinGame) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_JoinGame.Unmarshal(m, b)
+}
+func (m *JoinGame) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_JoinGame.Marshal(b, m, deterministic)
+}
+func (m *JoinGame) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_JoinGame.Merge(m, src)
+}
+func (m *JoinGame) XXX_Size() int {
+	return xxx_messageInfo_JoinGame.Size(m)
+}
+func (m *JoinGame) XXX_DiscardUnknown() {
+	xxx_messageInfo_JoinGame.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_JoinGame proto.InternalMessageInfo
+
+func (m *JoinGame) GetUsername() string {
+	if m != nil {
+		return m.Username
+	}
+	return ""
+}
+
+type UserMessage struct {
+	// Types that are valid to be assigned to Content:
+	//	*UserMessage_UserAction
+	//	*UserMessage_JoinGame
+	Content              isUserMessage_Content `protobuf_oneof:"content"`
+	XXX_NoUnkeyedLiteral struct{}              `json:"-"`
+	XXX_unrecognized     []byte                `json:"-"`
+	XXX_sizecache        int32                 `json:"-"`
+}
+
+func (m *UserMessage) Reset()         { *m = UserMessage{} }
+func (m *UserMessage) String() string { return proto.CompactTextString(m) }
+func (*UserMessage) ProtoMessage()    {}
+func (*UserMessage) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1b666822ed8f2be0, []int{4}
+}
+
+func (m *UserMessage) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_UserMessage.Unmarshal(m, b)
+}
+func (m *UserMessage) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_UserMessage.Marshal(b, m, deterministic)
+}
+func (m *UserMessage) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_UserMessage.Merge(m, src)
+}
+func (m *UserMessage) XXX_Size() int {
+	return xxx_messageInfo_UserMessage.Size(m)
+}
+func (m *UserMessage) XXX_DiscardUnknown() {
+	xxx_messageInfo_UserMessage.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_UserMessage proto.InternalMessageInfo
+
+type isUserMessage_Content interface {
+	isUserMessage_Content()
+}
+
+type UserMessage_UserAction struct {
+	UserAction *UserAction `protobuf:"bytes,1,opt,name=userAction,proto3,oneof"`
+}
+
+type UserMessage_JoinGame struct {
+	JoinGame *JoinGame `protobuf:"bytes,2,opt,name=joinGame,proto3,oneof"`
+}
+
+func (*UserMessage_UserAction) isUserMessage_Content() {}
+
+func (*UserMessage_JoinGame) isUserMessage_Content() {}
+
+func (m *UserMessage) GetContent() isUserMessage_Content {
+	if m != nil {
+		return m.Content
+	}
+	return nil
+}
+
+func (m *UserMessage) GetUserAction() *UserAction {
+	if x, ok := m.GetContent().(*UserMessage_UserAction); ok {
+		return x.UserAction
+	}
+	return nil
+}
+
+func (m *UserMessage) GetJoinGame() *JoinGame {
+	if x, ok := m.GetContent().(*UserMessage_JoinGame); ok {
+		return x.JoinGame
+	}
+	return nil
+}
+
+// XXX_OneofFuncs is for the internal use of the proto package.
+func (*UserMessage) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) error, func(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error), func(msg proto.Message) (n int), []interface{}) {
+	return _UserMessage_OneofMarshaler, _UserMessage_OneofUnmarshaler, _UserMessage_OneofSizer, []interface{}{
+		(*UserMessage_UserAction)(nil),
+		(*UserMessage_JoinGame)(nil),
+	}
+}
+
+func _UserMessage_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
+	m := msg.(*UserMessage)
+	// content
+	switch x := m.Content.(type) {
+	case *UserMessage_UserAction:
+		b.EncodeVarint(1<<3 | proto.WireBytes)
+		if err := b.EncodeMessage(x.UserAction); err != nil {
+			return err
+		}
+	case *UserMessage_JoinGame:
+		b.EncodeVarint(2<<3 | proto.WireBytes)
+		if err := b.EncodeMessage(x.JoinGame); err != nil {
+			return err
+		}
+	case nil:
+	default:
+		return fmt.Errorf("UserMessage.Content has unexpected type %T", x)
+	}
+	return nil
+}
+
+func _UserMessage_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Buffer) (bool, error) {
+	m := msg.(*UserMessage)
+	switch tag {
+	case 1: // content.userAction
+		if wire != proto.WireBytes {
+			return true, proto.ErrInternalBadWireType
+		}
+		msg := new(UserAction)
+		err := b.DecodeMessage(msg)
+		m.Content = &UserMessage_UserAction{msg}
+		return true, err
+	case 2: // content.joinGame
+		if wire != proto.WireBytes {
+			return true, proto.ErrInternalBadWireType
+		}
+		msg := new(JoinGame)
+		err := b.DecodeMessage(msg)
+		m.Content = &UserMessage_JoinGame{msg}
+		return true, err
+	default:
+		return false, nil
+	}
+}
+
+func _UserMessage_OneofSizer(msg proto.Message) (n int) {
+	m := msg.(*UserMessage)
+	// content
+	switch x := m.Content.(type) {
+	case *UserMessage_UserAction:
+		s := proto.Size(x.UserAction)
+		n += 1 // tag and wire
+		n += proto.SizeVarint(uint64(s))
+		n += s
+	case *UserMessage_JoinGame:
+		s := proto.Size(x.JoinGame)
+		n += 1 // tag and wire
+		n += proto.SizeVarint(uint64(s))
+		n += s
+	case nil:
+	default:
+		panic(fmt.Sprintf("proto: unexpected type %T in oneof", x))
+	}
+	return n
+}
+
 func init() {
+	proto.RegisterEnum("typingwars.UserInput", UserInput_name, UserInput_value)
 	proto.RegisterType((*Message)(nil), "typingwars.Message")
 	proto.RegisterType((*PlayerJoined)(nil), "typingwars.PlayerJoined")
+	proto.RegisterType((*UserAction)(nil), "typingwars.UserAction")
+	proto.RegisterType((*JoinGame)(nil), "typingwars.JoinGame")
+	proto.RegisterType((*UserMessage)(nil), "typingwars.UserMessage")
 }
 
 func init() { proto.RegisterFile("typingwars.proto", fileDescriptor_1b666822ed8f2be0) }
 
 var fileDescriptor_1b666822ed8f2be0 = []byte{
-	// 150 bytes of a gzipped FileDescriptorProto
+	// 271 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x12, 0x28, 0xa9, 0x2c, 0xc8,
 	0xcc, 0x4b, 0x2f, 0x4f, 0x2c, 0x2a, 0xd6, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0xe2, 0x42, 0x88,
 	0x28, 0x85, 0x70, 0xb1, 0xfb, 0xa6, 0x16, 0x17, 0x27, 0xa6, 0xa7, 0x0a, 0xd9, 0x71, 0xf1, 0x14,
@@ -196,7 +446,14 @@ var fileDescriptor_1b666822ed8f2be0 = []byte{
 	0x70, 0x1b, 0x49, 0xe8, 0x21, 0xe9, 0x0f, 0x40, 0x92, 0xf7, 0x60, 0x08, 0x42, 0x51, 0xef, 0xc4,
 	0xc9, 0xc5, 0x9e, 0x9c, 0x9f, 0x57, 0x92, 0x9a, 0x57, 0xa2, 0x64, 0xc5, 0xc5, 0x83, 0xac, 0x54,
 	0x88, 0x8f, 0x8b, 0x29, 0x13, 0x62, 0x20, 0x67, 0x10, 0x53, 0x66, 0x8a, 0x90, 0x14, 0x17, 0x47,
-	0x69, 0x71, 0x6a, 0x51, 0x5e, 0x62, 0x6e, 0xaa, 0x04, 0x13, 0x58, 0x14, 0xce, 0x77, 0x62, 0x89,
-	0x62, 0x2a, 0x48, 0x4a, 0x62, 0x03, 0x3b, 0xd5, 0x18, 0x10, 0x00, 0x00, 0xff, 0xff, 0x56, 0xe8,
-	0x31, 0x9a, 0xbe, 0x00, 0x00, 0x00,
+	0x69, 0x71, 0x6a, 0x51, 0x5e, 0x62, 0x6e, 0xaa, 0x04, 0x13, 0x58, 0x14, 0xce, 0x57, 0x72, 0xe4,
+	0xe2, 0x0a, 0x2d, 0x4e, 0x2d, 0x72, 0x4c, 0x2e, 0xc9, 0xcc, 0xcf, 0x13, 0x32, 0xe6, 0xe2, 0x04,
+	0xc9, 0x78, 0xe6, 0x15, 0x94, 0x96, 0x80, 0x0d, 0xe0, 0x33, 0x12, 0x45, 0x76, 0x51, 0x28, 0x4c,
+	0x32, 0x08, 0xa1, 0x4e, 0x49, 0x8d, 0x8b, 0x03, 0x64, 0xb1, 0x7b, 0x62, 0x6e, 0x2a, 0x8a, 0x55,
+	0x8c, 0x68, 0x56, 0xb5, 0x31, 0x72, 0x71, 0x83, 0x0c, 0x80, 0x85, 0x80, 0x05, 0x17, 0x57, 0x29,
+	0xdc, 0x6a, 0xa8, 0xff, 0xc5, 0xd0, 0x6d, 0x83, 0xc8, 0x7a, 0x30, 0x04, 0x21, 0xa9, 0x15, 0x32,
+	0xe2, 0xe2, 0xc8, 0x82, 0xda, 0x08, 0xf6, 0x10, 0xb7, 0x91, 0x08, 0xb2, 0x3e, 0x98, 0x6b, 0x3c,
+	0x18, 0x82, 0xe0, 0xea, 0x90, 0xc2, 0x4b, 0x4b, 0x84, 0x8b, 0x13, 0xee, 0x11, 0x21, 0x76, 0x2e,
+	0x66, 0x6f, 0xd7, 0x48, 0x01, 0x06, 0x27, 0x96, 0x28, 0xa6, 0x82, 0xa4, 0x24, 0x36, 0x70, 0xa4,
+	0x19, 0x03, 0x02, 0x00, 0x00, 0xff, 0xff, 0xa0, 0x49, 0x76, 0xef, 0xc8, 0x01, 0x00, 0x00,
 }

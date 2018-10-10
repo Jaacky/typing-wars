@@ -12,3 +12,22 @@ message PlayerJoined {
     string id = 1;
     string username = 2;
 }
+
+enum UserInput {
+    KEY = 0;
+}
+
+message UserAction {
+    UserInput userInput = 1;
+}
+
+message JoinGame {
+    string username = 1;
+}
+
+message UserMessage {
+    oneof content {
+        UserAction userAction = 1;
+        JoinGame joinGame = 2;
+    }
+}

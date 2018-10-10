@@ -4,6 +4,9 @@ import (
 	"log"
 	"time"
 
+	"github.com/Jaacky/typing-wars/pb"
+	"github.com/golang/protobuf/proto"
+
 	"github.com/gofrs/uuid"
 	"github.com/gorilla/websocket"
 )
@@ -33,6 +36,7 @@ type Client struct {
 
 	// Buffered channel of outbound messages.
 	send chan []byte
+	done chan bool
 }
 
 func NewClient(conn *websocket.Conn) *Client {
@@ -45,6 +49,7 @@ func NewClient(conn *websocket.Conn) *Client {
 		ID:   id,
 		Conn: conn,
 		send: make(chan []byte, 256),
+		done: make(chan bool),
 	}
 }
 
@@ -64,16 +69,13 @@ func (client *Client) listenRead() {
 	client.Conn.SetPongHandler(func(string) error { client.Conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 
 	for {
-		var msg map[string]interface{}
-		err := client.Conn.ReadJSON(&msg)
-		if err != nil {
-			log.Printf("Socket error: %v\n", err)
-			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("error: %v", err)
-			}
-			break
+		select {
+		case <-client.done:
+			client.done <- true
+			return
+		default:
+			client.readFromWebSocket()
 		}
-		log.Printf("Message received: %v\n", msg)
 	}
 }
 
@@ -86,16 +88,21 @@ func (client *Client) listenWrite() {
 
 	for {
 		select {
+		case <-client.done:
+			client.done <- true
+			return
 		case message, ok := <-client.send:
 			client.Conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
 				// The hub closed the channel.
 				client.Conn.WriteMessage(websocket.CloseMessage, []byte{})
+				client.done <- true
 				return
 			}
 
 			w, err := client.Conn.NextWriter(websocket.TextMessage)
 			if err != nil {
+				client.done <- true
 				return
 			}
 			w.Write(message)
@@ -108,16 +115,47 @@ func (client *Client) listenWrite() {
 			}
 
 			if err := w.Close(); err != nil {
+				client.done <- true
 				return
 			}
 		case <-ticker.C:
 			client.Conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if err := client.Conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				client.done <- true
 				return
 			}
 		}
 	}
+}
 
+func (client *Client) readFromWebSocket() {
+	messageType, data, err := client.Conn.ReadMessage()
+	if err != nil {
+		log.Println(err)
+		client.done <- true
+	} else if messageType != websocket.BinaryMessage {
+		log.Printf("Non binary message received, ignoring. Type: %d\n", messageType)
+	} else {
+		client.unmarshalUserMessage(data)
+	}
+}
+
+func (client *Client) unmarshalUserMessage(data []byte) {
+	userMessage := &pb.UserMessage{}
+
+	if err := proto.Unmarshal(data, userMessage); err != nil {
+		log.Fatalln("Failed to parse user message")
+		return
+	}
+
+	switch userMessageType := userMessage.Content.(type) {
+	case *pb.UserMessage_UserAction:
+		log.Println("UserMessage - UserAction")
+	case *pb.UserMessage_JoinGame:
+		log.Println("UserMessage - JoinGame")
+	default:
+		log.Printf("Unknown message type %T\n", userMessageType)
+	}
 }
 
 func (client *Client) SendMessage(message string) {
