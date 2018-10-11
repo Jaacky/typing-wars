@@ -1,18 +1,16 @@
-package game
+package typingwars
 
 import (
 	"time"
 
 	"github.com/Jaacky/typing-wars/constants"
-	"github.com/Jaacky/typing-wars/events"
-	"github.com/Jaacky/typing-wars/state"
 )
 
 type UnitSpawner struct {
-	eventDispatcher *events.EventDispatcher
+	eventDispatcher *EventDispatcher
 }
 
-func NewUnitSpawner(dispatcher *events.EventDispatcher) *UnitSpawner {
+func NewUnitSpawner(dispatcher *EventDispatcher) *UnitSpawner {
 	return &UnitSpawner{
 		eventDispatcher: dispatcher,
 	}
@@ -20,8 +18,8 @@ func NewUnitSpawner(dispatcher *events.EventDispatcher) *UnitSpawner {
 
 func (spawner *UnitSpawner) Run() {
 	for range time.Tick(constants.UnitSpawningInterval) {
-		unit := state.NewUnit("hello world", 1, 1)
-		event := &events.UnitSpawned{
+		unit := NewUnit("hello world", 1, 1)
+		event := &UnitSpawned{
 			Unit: unit,
 		}
 		spawner.eventDispatcher.FireUnitSpawned(event)

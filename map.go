@@ -1,23 +1,23 @@
-package state
+package typingwars
 
 import (
-	"github.com/Jaacky/typing-wars/communication"
 	"github.com/Jaacky/typing-wars/types"
+	"github.com/gofrs/uuid"
 )
 
 // Map struct
 type Map struct {
-	Bases map[string]*Base
-	Units map[string]*Unit
+	Bases map[uuid.UUID]*Base
+	Units map[uuid.UUID]*Unit
 }
 
 // NewMap Initialization
-func (m *Map) NewMap(clients *[]communication.Client) *Map {
-	bases := make(map[string]*Base)
+func (m *Map) NewMap(clients map[uuid.UUID]*Client) *Map {
+	bases := make(map[uuid.UUID]*Base)
 
+	i := 0
 	// Hard coding 2 players only
-	for i := 0; i < len(clients); i++ {
-		client := clients[i]
+	for _, client := range clients {
 		var point *types.Point
 		if i == 0 {
 			point = types.NewPoint(5, 50)
@@ -26,11 +26,13 @@ func (m *Map) NewMap(clients *[]communication.Client) *Map {
 		}
 
 		base := NewBase(client.ID, point)
-		bases = append(bases, base)
+		bases[client.ID] = base
+		i++
+
 	}
 
 	return &Map{
 		Bases: bases,
-		Units: make(map[string]*Unit),
+		Units: make(map[uuid.UUID]*Unit),
 	}
 }

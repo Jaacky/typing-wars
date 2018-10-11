@@ -21,6 +21,10 @@ message UserAction {
     UserInput userInput = 1;
 }
 
+message RegisterPlayer {
+    string username = 1;
+}
+
 message JoinGame {
     string username = 1;
 }
@@ -28,6 +32,7 @@ message JoinGame {
 message UserMessage {
     oneof content {
         UserAction userAction = 1;
-        JoinGame joinGame = 2;
+        RegisterPlayer registerPlayer = 2;
+        JoinGame joinGame = 3;
     }
 }

@@ -1,4 +1,4 @@
-package state
+package typingwars
 
 // Unit struct describes a word unit
 type Unit struct {

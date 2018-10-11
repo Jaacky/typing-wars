@@ -1,18 +1,17 @@
-package game
+package typingwars
 
 import (
 	"time"
 
 	"github.com/Jaacky/typing-wars/constants"
-	"github.com/Jaacky/typing-wars/events"
 )
 
 type PhysicsTicker struct {
 	currentFrameID  uint32
-	eventDispatcher *events.EventDispatcher
+	eventDispatcher *EventDispatcher
 }
 
-func NewPhysicsTicker(dispatcher *events.EventDispatcher) *PhysicsTicker {
+func NewPhysicsTicker(dispatcher *EventDispatcher) *PhysicsTicker {
 	return &PhysicsTicker{
 		currentFrameID:  1,
 		eventDispatcher: dispatcher,
@@ -23,7 +22,7 @@ func (ticker *PhysicsTicker) Run() {
 	var i uint32
 	i = 0
 	for range time.Tick(constants.PhysicsFrameDuration) {
-		event := &events.TimeTick{
+		event := &TimeTick{
 			FrameID: i,
 		}
 		ticker.eventDispatcher.FireTimeTick(event)

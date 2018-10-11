@@ -1,4 +1,4 @@
-package communication
+package typingwars
 
 import (
 	"log"
@@ -39,6 +39,8 @@ type Client struct {
 	// Buffered channel of outbound messages.
 	send chan []byte
 	done chan bool
+
+	Player *Player
 }
 
 func NewClient(conn *websocket.Conn, room *Room) *Client {

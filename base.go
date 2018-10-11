@@ -1,17 +1,20 @@
-package state
+package typingwars
 
-import "github.com/Jaacky/typing-wars/types"
+import (
+	"github.com/Jaacky/typing-wars/types"
+	"github.com/gofrs/uuid"
+)
 
 // Base struct
 type Base struct {
-	Owner    string
+	Owner    uuid.UUID
 	HP       int32
 	Colour   string
 	Position *types.Point
 }
 
 // NewBase initialization
-func (base *Base) NewBase(ownerID string, position *types.Point) *Base {
+func NewBase(ownerID uuid.UUID, position *types.Point) *Base {
 	return &Base{
 		Owner:    ownerID,
 		HP:       50,

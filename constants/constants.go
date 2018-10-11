@@ -5,6 +5,6 @@ import (
 )
 
 const (
-	PhysicsFrameDuration = 20 * time.Millisecond
+	PhysicsFrameDuration = 2000 * time.Millisecond
 	UnitSpawningInterval = 3 * time.Second
 )
