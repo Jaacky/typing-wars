@@ -1,7 +1,7 @@
 package typingwars
 
 import (
-	"github.com/Jaacky/typing-wars/types"
+	"github.com/Jaacky/typingwars/types"
 	"github.com/gofrs/uuid"
 )
 

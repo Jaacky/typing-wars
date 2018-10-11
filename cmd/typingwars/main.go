@@ -4,11 +4,11 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/Jaacky/typing-wars/communication"
+	"github.com/Jaacky/typingwars"
 )
 
 func main() {
-	server := communication.NewServer()
+	server := typingwars.NewServer()
 
 	server.Listen()
 	log.Fatal(http.ListenAndServe(":8080", nil))

@@ -3,7 +3,7 @@ package typingwars
 import (
 	"time"
 
-	"github.com/Jaacky/typing-wars/constants"
+	"github.com/Jaacky/typingwars/constants"
 )
 
 type PhysicsTicker struct {

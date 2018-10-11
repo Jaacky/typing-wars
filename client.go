@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Jaacky/typing-wars/pb"
+	"github.com/Jaacky/typingwars/pb"
 	"github.com/golang/protobuf/proto"
 
 	"github.com/gofrs/uuid"
