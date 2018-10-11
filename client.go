@@ -1,6 +1,7 @@
 package typingwars
 
 import (
+	"fmt"
 	"log"
 	"strings"
 	"time"
@@ -31,10 +32,20 @@ var (
 	space   = []byte{' '}
 )
 
+type ClientJoinRoomError struct {
+	AttemptedRoomID uuid.UUID
+	Msg             string
+}
+
+func (err *ClientJoinRoomError) Error() string {
+	return fmt.Sprintf("Failed to join room %s : %s", err.AttemptedRoomID, err.Msg)
+}
+
 type Client struct {
-	ID   uuid.UUID
-	Conn *websocket.Conn
-	Room *Room
+	ID     uuid.UUID
+	Conn   *websocket.Conn
+	Server *Server
+	Room   *Room
 
 	// Buffered channel of outbound messages.
 	send chan []byte
@@ -43,19 +54,31 @@ type Client struct {
 	Player *Player
 }
 
-func NewClient(conn *websocket.Conn, room *Room) *Client {
+func NewClient(conn *websocket.Conn, server *Server) *Client {
 	id, err := uuid.NewV4()
 	if err != nil {
 		log.Fatalf("Failed to generate uuid: %v", err)
 	}
 
 	return &Client{
-		ID:   id,
-		Conn: conn,
-		Room: room,
-		send: make(chan []byte, 256),
-		done: make(chan bool),
+		ID:     id,
+		Conn:   conn,
+		Server: server,
+		send:   make(chan []byte, 256),
+		done:   make(chan bool),
 	}
+}
+
+func (client *Client) SetRoom(room *Room) error {
+	if client.Room != nil {
+		return &ClientJoinRoomError{
+			AttemptedRoomID: room.ID,
+			Msg:             fmt.Sprintf("Already in room %s", client.Room.ID),
+		}
+	}
+
+	client.Room = room
+	return nil
 }
 
 func (client *Client) Listen() {
@@ -66,6 +89,8 @@ func (client *Client) Listen() {
 
 func (client *Client) listenRead() {
 	defer func() {
+		// TODO: Check and remove client from room
+		client.Server.removeClient(client)
 		client.Conn.Close()
 	}()
 
@@ -87,7 +112,9 @@ func (client *Client) listenRead() {
 func (client *Client) listenWrite() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
+		// TODO: Check and remove client from room
 		ticker.Stop()
+		client.Server.removeClient(client)
 		client.Conn.Close()
 	}()
 
@@ -156,8 +183,18 @@ func (client *Client) unmarshalUserMessage(data []byte) {
 	switch userMessageType := userMessage.Content.(type) {
 	case *pb.UserMessage_UserAction:
 		log.Println("UserMessage - UserAction")
-	case *pb.UserMessage_JoinGame:
-		log.Println("UserMessage - JoinGame")
+	case *pb.UserMessage_CreateGameRequest:
+		log.Println("UserMessage - CreateGameRequest")
+		client.Server.roomCreateCh <- client.ID
+	case *pb.UserMessage_JoinGameRequest:
+		log.Println("UserMessage - JoinGameRequest")
+		roomID, err := uuid.FromString(userMessage.GetJoinGameRequest().GetRoomId())
+		if err != nil {
+			// TODO: Return error to client
+			log.Println("Join Game Request - Unable to parse ID from string")
+			return
+		}
+		client.Server.roomJoinCh <- roomJoinRequest{roomID: roomID, clientID: client.ID}
 	case *pb.UserMessage_RegisterPlayer:
 		log.Println("UserMessage - RegisterPlayer")
 		client.tryToRegisterPlayer(userMessage.GetRegisterPlayer())
@@ -167,7 +204,7 @@ func (client *Client) unmarshalUserMessage(data []byte) {
 }
 
 func (client *Client) tryToRegisterPlayer(registerPlayerMsg *pb.RegisterPlayer) {
-	username := strings.TrimSpace(registerPlayerMsg.Username)
+	username := strings.TrimSpace(registerPlayerMsg.GetUsername())
 	log.Printf("Registering player: %s\n", username)
 }
 

@@ -9,19 +9,31 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+type roomJoinRequest struct {
+	roomID   uuid.UUID
+	clientID uuid.UUID
+}
+
 type Server struct {
 	rooms    map[uuid.UUID]*Room
+	clients  map[uuid.UUID]*Client
 	upgrader *websocket.Upgrader
+
+	roomCreateCh chan uuid.UUID
+	roomJoinCh   chan roomJoinRequest
 }
 
 func NewServer() *Server {
 	return &Server{
-		rooms: make(map[uuid.UUID]*Room),
+		rooms:   make(map[uuid.UUID]*Room),
+		clients: make(map[uuid.UUID]*Client),
 		upgrader: &websocket.Upgrader{
 			ReadBufferSize:  1024,
 			WriteBufferSize: 1024,
 			CheckOrigin:     func(r *http.Request) bool { return true },
 		},
+		roomCreateCh: make(chan uuid.UUID),
+		roomJoinCh:   make(chan roomJoinRequest),
 	}
 }
 
@@ -29,61 +41,73 @@ func (server *Server) addRoom(room *Room) {
 	server.rooms[room.ID] = room
 }
 
+func (server *Server) addClient(client *Client) {
+	server.clients[client.ID] = client
+}
+
+func (server *Server) removeClient(client *Client) {
+	delete(server.clients, client.ID)
+}
+
 func (server *Server) Listen() {
-	createRoom := func(w http.ResponseWriter, r *http.Request) {
-		log.Println("Client attempting to connect")
+	connect := func(w http.ResponseWriter, r *http.Request) {
+		log.Println("Client attempting connection")
 		conn, err := server.upgrader.Upgrade(w, r, nil)
 		if err != nil {
 			log.Println(err)
 			return
 		}
 
-		log.Println("Client connected")
-
-		room := NewRoom()
-		server.addRoom(room)
-
-		client := NewClient(conn, room)
-		room.addClient(client)
-
+		log.Println("Client connection established")
+		client := NewClient(conn, server)
+		server.addClient(client)
 		client.Listen()
 	}
 
-	joinRoom := func(w http.ResponseWriter, r *http.Request) {
-		log.Println("Client attempting to join a room")
-		conn, err := server.upgrader.Upgrade(w, r, nil)
-		if err != nil {
-			log.Println(err)
-			return
-		}
+	http.HandleFunc("/connect", connect)
+	http.HandleFunc("/", home)
 
-		log.Println("Joining client connection established")
+	go server.manageRooms()
+	log.Println("End of serverlisten")
+}
 
-		roomID, err := uuid.FromString(r.FormValue("roomID"))
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		room, ok := server.rooms[roomID]
-		if ok {
-			client := NewClient(conn, room)
-			room.addClient(client)
+func (server *Server) manageRooms() {
+	for {
+		select {
+		case clientID := <-server.roomCreateCh:
+			log.Printf("Client %s creating room", clientID)
+			client := server.clients[clientID]
+			room := NewRoom()
+			err := client.SetRoom(room)
+			if err != nil {
+				// TODO: Return room error to client
+				log.Println(err)
+			} else {
+				server.addRoom(room)
+				room.addClient(client)
+			}
+		case request := <-server.roomJoinCh:
+			log.Printf("Client %s joining room %s", request.clientID, request.roomID)
+			client := server.clients[request.clientID]
+			room, ok := server.rooms[request.roomID]
+			if ok {
+				err := client.SetRoom(room)
+				if err != nil {
+					// TODO: Return room error to client
+					log.Println(err)
+				} else {
+					room.addClient(client)
+				}
+			} else {
+				// TODO: Room does not exist, return room error to client
+			}
 
-			client.Listen()
-		} else {
-			log.Println("Room ID not found")
-			// TODO: send room id not found message back to client browser
-			return
 		}
 	}
-
-	http.HandleFunc("/create", createRoom)
-	http.HandleFunc("/join", joinRoom)
-	http.HandleFunc("/", home)
 }
 
 func home(w http.ResponseWriter, r *http.Request) {
-	homeTemplate.Execute(w, "ws://"+r.Host+"/create")
+	homeTemplate.Execute(w, "ws://"+r.Host+"/connect")
 }
 
 var homeTemplate = template.Must(template.New("").Parse(`

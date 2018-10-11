@@ -25,14 +25,20 @@ message RegisterPlayer {
     string username = 1;
 }
 
-message JoinGame {
+message CreateGameRequest {
     string username = 1;
+}
+
+message JoinGameRequest {
+    string username = 1;
+    string room_id = 2;
 }
 
 message UserMessage {
     oneof content {
         UserAction userAction = 1;
         RegisterPlayer registerPlayer = 2;
-        JoinGame joinGame = 3;
+        CreateGameRequest createGameRequest = 3;
+        JoinGameRequest joinGameRequest = 4;
     }
 }

@@ -280,41 +280,88 @@ func (m *RegisterPlayer) GetUsername() string {
 	return ""
 }
 
-type JoinGame struct {
+type CreateGameRequest struct {
 	Username             string   `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *JoinGame) Reset()         { *m = JoinGame{} }
-func (m *JoinGame) String() string { return proto.CompactTextString(m) }
-func (*JoinGame) ProtoMessage()    {}
-func (*JoinGame) Descriptor() ([]byte, []int) {
+func (m *CreateGameRequest) Reset()         { *m = CreateGameRequest{} }
+func (m *CreateGameRequest) String() string { return proto.CompactTextString(m) }
+func (*CreateGameRequest) ProtoMessage()    {}
+func (*CreateGameRequest) Descriptor() ([]byte, []int) {
 	return fileDescriptor_1b666822ed8f2be0, []int{4}
 }
 
-func (m *JoinGame) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_JoinGame.Unmarshal(m, b)
+func (m *CreateGameRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_CreateGameRequest.Unmarshal(m, b)
 }
-func (m *JoinGame) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_JoinGame.Marshal(b, m, deterministic)
+func (m *CreateGameRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_CreateGameRequest.Marshal(b, m, deterministic)
 }
-func (m *JoinGame) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_JoinGame.Merge(m, src)
+func (m *CreateGameRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CreateGameRequest.Merge(m, src)
 }
-func (m *JoinGame) XXX_Size() int {
-	return xxx_messageInfo_JoinGame.Size(m)
+func (m *CreateGameRequest) XXX_Size() int {
+	return xxx_messageInfo_CreateGameRequest.Size(m)
 }
-func (m *JoinGame) XXX_DiscardUnknown() {
-	xxx_messageInfo_JoinGame.DiscardUnknown(m)
+func (m *CreateGameRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_CreateGameRequest.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_JoinGame proto.InternalMessageInfo
+var xxx_messageInfo_CreateGameRequest proto.InternalMessageInfo
 
-func (m *JoinGame) GetUsername() string {
+func (m *CreateGameRequest) GetUsername() string {
 	if m != nil {
 		return m.Username
+	}
+	return ""
+}
+
+type JoinGameRequest struct {
+	Username             string   `protobuf:"bytes,1,opt,name=username,proto3" json:"username,omitempty"`
+	RoomId               string   `protobuf:"bytes,2,opt,name=room_id,json=roomId,proto3" json:"room_id,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *JoinGameRequest) Reset()         { *m = JoinGameRequest{} }
+func (m *JoinGameRequest) String() string { return proto.CompactTextString(m) }
+func (*JoinGameRequest) ProtoMessage()    {}
+func (*JoinGameRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_1b666822ed8f2be0, []int{5}
+}
+
+func (m *JoinGameRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_JoinGameRequest.Unmarshal(m, b)
+}
+func (m *JoinGameRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_JoinGameRequest.Marshal(b, m, deterministic)
+}
+func (m *JoinGameRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_JoinGameRequest.Merge(m, src)
+}
+func (m *JoinGameRequest) XXX_Size() int {
+	return xxx_messageInfo_JoinGameRequest.Size(m)
+}
+func (m *JoinGameRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_JoinGameRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_JoinGameRequest proto.InternalMessageInfo
+
+func (m *JoinGameRequest) GetUsername() string {
+	if m != nil {
+		return m.Username
+	}
+	return ""
+}
+
+func (m *JoinGameRequest) GetRoomId() string {
+	if m != nil {
+		return m.RoomId
 	}
 	return ""
 }
@@ -323,7 +370,8 @@ type UserMessage struct {
 	// Types that are valid to be assigned to Content:
 	//	*UserMessage_UserAction
 	//	*UserMessage_RegisterPlayer
-	//	*UserMessage_JoinGame
+	//	*UserMessage_CreateGameRequest
+	//	*UserMessage_JoinGameRequest
 	Content              isUserMessage_Content `protobuf_oneof:"content"`
 	XXX_NoUnkeyedLiteral struct{}              `json:"-"`
 	XXX_unrecognized     []byte                `json:"-"`
@@ -334,7 +382,7 @@ func (m *UserMessage) Reset()         { *m = UserMessage{} }
 func (m *UserMessage) String() string { return proto.CompactTextString(m) }
 func (*UserMessage) ProtoMessage()    {}
 func (*UserMessage) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1b666822ed8f2be0, []int{5}
+	return fileDescriptor_1b666822ed8f2be0, []int{6}
 }
 
 func (m *UserMessage) XXX_Unmarshal(b []byte) error {
@@ -367,15 +415,21 @@ type UserMessage_RegisterPlayer struct {
 	RegisterPlayer *RegisterPlayer `protobuf:"bytes,2,opt,name=registerPlayer,proto3,oneof"`
 }
 
-type UserMessage_JoinGame struct {
-	JoinGame *JoinGame `protobuf:"bytes,3,opt,name=joinGame,proto3,oneof"`
+type UserMessage_CreateGameRequest struct {
+	CreateGameRequest *CreateGameRequest `protobuf:"bytes,3,opt,name=createGameRequest,proto3,oneof"`
+}
+
+type UserMessage_JoinGameRequest struct {
+	JoinGameRequest *JoinGameRequest `protobuf:"bytes,4,opt,name=joinGameRequest,proto3,oneof"`
 }
 
 func (*UserMessage_UserAction) isUserMessage_Content() {}
 
 func (*UserMessage_RegisterPlayer) isUserMessage_Content() {}
 
-func (*UserMessage_JoinGame) isUserMessage_Content() {}
+func (*UserMessage_CreateGameRequest) isUserMessage_Content() {}
+
+func (*UserMessage_JoinGameRequest) isUserMessage_Content() {}
 
 func (m *UserMessage) GetContent() isUserMessage_Content {
 	if m != nil {
@@ -398,9 +452,16 @@ func (m *UserMessage) GetRegisterPlayer() *RegisterPlayer {
 	return nil
 }
 
-func (m *UserMessage) GetJoinGame() *JoinGame {
-	if x, ok := m.GetContent().(*UserMessage_JoinGame); ok {
-		return x.JoinGame
+func (m *UserMessage) GetCreateGameRequest() *CreateGameRequest {
+	if x, ok := m.GetContent().(*UserMessage_CreateGameRequest); ok {
+		return x.CreateGameRequest
+	}
+	return nil
+}
+
+func (m *UserMessage) GetJoinGameRequest() *JoinGameRequest {
+	if x, ok := m.GetContent().(*UserMessage_JoinGameRequest); ok {
+		return x.JoinGameRequest
 	}
 	return nil
 }
@@ -410,7 +471,8 @@ func (*UserMessage) XXX_OneofFuncs() (func(msg proto.Message, b *proto.Buffer) e
 	return _UserMessage_OneofMarshaler, _UserMessage_OneofUnmarshaler, _UserMessage_OneofSizer, []interface{}{
 		(*UserMessage_UserAction)(nil),
 		(*UserMessage_RegisterPlayer)(nil),
-		(*UserMessage_JoinGame)(nil),
+		(*UserMessage_CreateGameRequest)(nil),
+		(*UserMessage_JoinGameRequest)(nil),
 	}
 }
 
@@ -428,9 +490,14 @@ func _UserMessage_OneofMarshaler(msg proto.Message, b *proto.Buffer) error {
 		if err := b.EncodeMessage(x.RegisterPlayer); err != nil {
 			return err
 		}
-	case *UserMessage_JoinGame:
+	case *UserMessage_CreateGameRequest:
 		b.EncodeVarint(3<<3 | proto.WireBytes)
-		if err := b.EncodeMessage(x.JoinGame); err != nil {
+		if err := b.EncodeMessage(x.CreateGameRequest); err != nil {
+			return err
+		}
+	case *UserMessage_JoinGameRequest:
+		b.EncodeVarint(4<<3 | proto.WireBytes)
+		if err := b.EncodeMessage(x.JoinGameRequest); err != nil {
 			return err
 		}
 	case nil:
@@ -459,13 +526,21 @@ func _UserMessage_OneofUnmarshaler(msg proto.Message, tag, wire int, b *proto.Bu
 		err := b.DecodeMessage(msg)
 		m.Content = &UserMessage_RegisterPlayer{msg}
 		return true, err
-	case 3: // content.joinGame
+	case 3: // content.createGameRequest
 		if wire != proto.WireBytes {
 			return true, proto.ErrInternalBadWireType
 		}
-		msg := new(JoinGame)
+		msg := new(CreateGameRequest)
 		err := b.DecodeMessage(msg)
-		m.Content = &UserMessage_JoinGame{msg}
+		m.Content = &UserMessage_CreateGameRequest{msg}
+		return true, err
+	case 4: // content.joinGameRequest
+		if wire != proto.WireBytes {
+			return true, proto.ErrInternalBadWireType
+		}
+		msg := new(JoinGameRequest)
+		err := b.DecodeMessage(msg)
+		m.Content = &UserMessage_JoinGameRequest{msg}
 		return true, err
 	default:
 		return false, nil
@@ -486,8 +561,13 @@ func _UserMessage_OneofSizer(msg proto.Message) (n int) {
 		n += 1 // tag and wire
 		n += proto.SizeVarint(uint64(s))
 		n += s
-	case *UserMessage_JoinGame:
-		s := proto.Size(x.JoinGame)
+	case *UserMessage_CreateGameRequest:
+		s := proto.Size(x.CreateGameRequest)
+		n += 1 // tag and wire
+		n += proto.SizeVarint(uint64(s))
+		n += s
+	case *UserMessage_JoinGameRequest:
+		s := proto.Size(x.JoinGameRequest)
 		n += 1 // tag and wire
 		n += proto.SizeVarint(uint64(s))
 		n += s
@@ -504,31 +584,36 @@ func init() {
 	proto.RegisterType((*PlayerJoined)(nil), "typingwars.PlayerJoined")
 	proto.RegisterType((*UserAction)(nil), "typingwars.UserAction")
 	proto.RegisterType((*RegisterPlayer)(nil), "typingwars.RegisterPlayer")
-	proto.RegisterType((*JoinGame)(nil), "typingwars.JoinGame")
+	proto.RegisterType((*CreateGameRequest)(nil), "typingwars.CreateGameRequest")
+	proto.RegisterType((*JoinGameRequest)(nil), "typingwars.JoinGameRequest")
 	proto.RegisterType((*UserMessage)(nil), "typingwars.UserMessage")
 }
 
 func init() { proto.RegisterFile("typingwars.proto", fileDescriptor_1b666822ed8f2be0) }
 
 var fileDescriptor_1b666822ed8f2be0 = []byte{
-	// 303 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x7c, 0x92, 0xc1, 0x4b, 0xc3, 0x30,
-	0x14, 0xc6, 0xdb, 0x4e, 0x6c, 0xfb, 0x3a, 0xca, 0x08, 0x53, 0xca, 0x4e, 0xd2, 0x83, 0x88, 0xc8,
-	0x0e, 0xdd, 0x45, 0x3c, 0x08, 0x1b, 0x8a, 0x55, 0x11, 0x24, 0xb8, 0x83, 0xde, 0xba, 0xed, 0x51,
-	0x22, 0x2e, 0x2d, 0x49, 0x8a, 0xec, 0x7f, 0xf4, 0x8f, 0x92, 0xb6, 0x6b, 0x97, 0xf6, 0xb0, 0x63,
-	0xf3, 0x7d, 0x5f, 0xde, 0xef, 0x7d, 0x0d, 0x8c, 0xd4, 0x2e, 0x67, 0x3c, 0xfd, 0x4d, 0x84, 0x9c,
-	0xe6, 0x22, 0x53, 0x19, 0x81, 0xc3, 0x49, 0xf8, 0x01, 0xf6, 0x1b, 0x4a, 0x99, 0xa4, 0x48, 0xee,
-	0x61, 0x98, 0xff, 0x24, 0x3b, 0x14, 0x2f, 0x19, 0xe3, 0xb8, 0x09, 0xcc, 0x0b, 0xf3, 0xca, 0x8b,
-	0x82, 0xa9, 0x96, 0x7f, 0xd7, 0xf4, 0xd8, 0xa0, 0x1d, 0xff, 0xc2, 0x05, 0x7b, 0x9d, 0x71, 0x85,
-	0x5c, 0x85, 0x77, 0x30, 0xd4, 0xad, 0xc4, 0x07, 0x8b, 0xd5, 0x17, 0xba, 0xd4, 0x62, 0x1b, 0x32,
-	0x01, 0xa7, 0x90, 0x28, 0x78, 0xb2, 0xc5, 0xc0, 0xaa, 0x4e, 0xdb, 0xef, 0x70, 0x0e, 0xb0, 0x94,
-	0x28, 0xe6, 0x6b, 0xc5, 0x32, 0x4e, 0x66, 0xe0, 0x96, 0xca, 0x33, 0xcf, 0x0b, 0x55, 0x5d, 0xe0,
-	0x47, 0x67, 0x3a, 0xd1, 0xb2, 0x11, 0xe9, 0xc1, 0x17, 0xde, 0x80, 0x4f, 0x31, 0x65, 0x52, 0xa1,
-	0xa8, 0x31, 0x3a, 0x03, 0xcd, 0xde, 0xc0, 0x4b, 0x70, 0x4a, 0xcc, 0xa7, 0x64, 0x8b, 0x47, 0x7d,
-	0x7f, 0x26, 0x78, 0xe5, 0xb8, 0xa6, 0xaf, 0x5b, 0x80, 0xa2, 0x05, 0xdd, 0xb7, 0x75, 0xde, 0x67,
-	0xab, 0xd5, 0xd8, 0xa0, 0x9a, 0x97, 0x3c, 0x80, 0x2f, 0x3a, 0x7c, 0x55, 0x09, 0x5e, 0x34, 0xd1,
-	0xd3, 0xdd, 0x0d, 0x62, 0x83, 0xf6, 0x32, 0x24, 0x02, 0xe7, 0x7b, 0xcf, 0x1d, 0x0c, 0xaa, 0xfc,
-	0x58, 0xcf, 0x37, 0x3b, 0xc5, 0x06, 0x6d, 0x7d, 0xda, 0x3f, 0xba, 0x1e, 0x83, 0xdb, 0x96, 0x47,
-	0x6c, 0x18, 0xbc, 0x3e, 0x7e, 0x8e, 0x8c, 0xc5, 0xc9, 0x97, 0x95, 0xaf, 0x56, 0xa7, 0xd5, 0x43,
-	0x99, 0xfd, 0x07, 0x00, 0x00, 0xff, 0xff, 0x5f, 0x40, 0x54, 0x60, 0x3c, 0x02, 0x00, 0x00,
+	// 356 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x52, 0x4b, 0x4b, 0xeb, 0x40,
+	0x14, 0x4e, 0xd3, 0xd2, 0xdc, 0x9c, 0x96, 0xb4, 0x1d, 0xee, 0xbd, 0x86, 0x8a, 0x20, 0x59, 0x89,
+	0x48, 0x85, 0x76, 0x23, 0x2e, 0x84, 0xd6, 0x47, 0x53, 0xa5, 0x20, 0x83, 0x5d, 0xe8, 0x46, 0xd2,
+	0xe6, 0x50, 0x22, 0x76, 0x26, 0xce, 0x4c, 0x90, 0xfe, 0x2b, 0x7f, 0xa2, 0x24, 0x7d, 0x4d, 0x52,
+	0x10, 0x97, 0x33, 0xdf, 0xe3, 0x9c, 0xef, 0x9b, 0x81, 0xa6, 0x5a, 0xc6, 0x11, 0x9b, 0x7f, 0x06,
+	0x42, 0x76, 0x62, 0xc1, 0x15, 0x27, 0xb0, 0xbb, 0xf1, 0x9e, 0xc0, 0x1a, 0xa3, 0x94, 0xc1, 0x1c,
+	0xc9, 0x15, 0xd4, 0xe3, 0xf7, 0x60, 0x89, 0xe2, 0x9e, 0x47, 0x0c, 0x43, 0xb7, 0x74, 0x5c, 0x3a,
+	0xa9, 0x75, 0xdd, 0x8e, 0xa6, 0x7f, 0xd4, 0x70, 0xdf, 0xa0, 0x39, 0xfe, 0xc0, 0x06, 0x6b, 0xc6,
+	0x99, 0x42, 0xa6, 0xbc, 0x4b, 0xa8, 0xeb, 0x54, 0xe2, 0x80, 0x19, 0xad, 0x0c, 0x6d, 0x6a, 0x46,
+	0x21, 0x69, 0xc3, 0x9f, 0x44, 0xa2, 0x60, 0xc1, 0x02, 0x5d, 0x33, 0xbb, 0xdd, 0x9e, 0xbd, 0x3e,
+	0xc0, 0x44, 0xa2, 0xe8, 0xcf, 0x54, 0xc4, 0x19, 0xe9, 0x81, 0x9d, 0x22, 0x23, 0x16, 0x27, 0x2a,
+	0x33, 0x70, 0xba, 0xff, 0xf4, 0x8d, 0x26, 0x1b, 0x90, 0xee, 0x78, 0xde, 0x19, 0x38, 0x14, 0xe7,
+	0x91, 0x54, 0x28, 0x56, 0x6b, 0xe4, 0x06, 0x96, 0x0a, 0x03, 0xcf, 0xa1, 0x75, 0x2d, 0x30, 0x50,
+	0x38, 0x0c, 0x16, 0x48, 0xf1, 0x23, 0x41, 0xa9, 0x7e, 0x14, 0xdc, 0x41, 0x23, 0xcd, 0xf5, 0x4b,
+	0x3a, 0x39, 0x00, 0x4b, 0x70, 0xbe, 0x78, 0x8d, 0xc2, 0x75, 0xd6, 0x6a, 0x7a, 0x1c, 0x85, 0xde,
+	0x97, 0x09, 0xb5, 0x74, 0xff, 0xcd, 0x03, 0x5c, 0x00, 0x24, 0xdb, 0xe4, 0xeb, 0xfa, 0xff, 0x17,
+	0xc3, 0xae, 0x50, 0xdf, 0xa0, 0x1a, 0x97, 0xdc, 0x80, 0x23, 0x72, 0x81, 0xb3, 0x49, 0xb5, 0x6e,
+	0x5b, 0x57, 0xe7, 0x2b, 0xf1, 0x0d, 0x5a, 0xd0, 0x90, 0x31, 0xb4, 0x66, 0xc5, 0x22, 0xdc, 0x72,
+	0x66, 0x74, 0xa4, 0x1b, 0xed, 0xb5, 0xe5, 0x1b, 0x74, 0x5f, 0x49, 0x86, 0xd0, 0x78, 0xcb, 0xd7,
+	0xe4, 0x56, 0x32, 0xb3, 0x43, 0xdd, 0xac, 0xd0, 0xa4, 0x6f, 0xd0, 0xa2, 0x4a, 0xfb, 0x58, 0xa7,
+	0x7f, 0xc1, 0xde, 0xbe, 0x38, 0xb1, 0xa0, 0xfc, 0x70, 0xfb, 0xdc, 0x34, 0x06, 0x95, 0x17, 0x33,
+	0x9e, 0x4e, 0xab, 0xd9, 0xef, 0xee, 0x7d, 0x07, 0x00, 0x00, 0xff, 0xff, 0x92, 0x55, 0x89, 0x20,
+	0xf1, 0x02, 0x00, 0x00,
 }
