@@ -9,9 +9,15 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type roomJoinRequest struct {
-	roomID   uuid.UUID
+type roomCreateRequest struct {
 	clientID uuid.UUID
+	username string
+}
+
+type roomJoinRequest struct {
+	clientID uuid.UUID
+	username string
+	roomID   uuid.UUID
 }
 
 type Server struct {
@@ -19,7 +25,7 @@ type Server struct {
 	clients  map[uuid.UUID]*Client
 	upgrader *websocket.Upgrader
 
-	roomCreateCh chan uuid.UUID
+	roomCreateCh chan *roomCreateRequest
 	roomJoinCh   chan roomJoinRequest
 }
 
@@ -32,7 +38,7 @@ func NewServer() *Server {
 			WriteBufferSize: 1024,
 			CheckOrigin:     func(r *http.Request) bool { return true },
 		},
-		roomCreateCh: make(chan uuid.UUID),
+		roomCreateCh: make(chan *roomCreateRequest),
 		roomJoinCh:   make(chan roomJoinRequest),
 	}
 }
@@ -74,9 +80,9 @@ func (server *Server) Listen() {
 func (server *Server) manageRooms() {
 	for {
 		select {
-		case clientID := <-server.roomCreateCh:
-			log.Printf("Client %s creating room", clientID)
-			client := server.clients[clientID]
+		case request := <-server.roomCreateCh:
+			log.Printf("Client %s creating room", request.clientID)
+			client := server.clients[request.clientID]
 			room := NewRoom()
 			err := client.SetRoom(room)
 			if err != nil {
@@ -84,10 +90,10 @@ func (server *Server) manageRooms() {
 				log.Println(err)
 			} else {
 				server.addRoom(room)
-				room.addClient(client)
+				room.addClient(client, request.username)
 			}
 		case request := <-server.roomJoinCh:
-			log.Printf("Client %s joining room %s", request.clientID, request.roomID)
+			log.Printf("Client %s %s joining room %s", request.username, request.clientID, request.roomID)
 			client := server.clients[request.clientID]
 			room, ok := server.rooms[request.roomID]
 			if ok {
@@ -96,7 +102,7 @@ func (server *Server) manageRooms() {
 					// TODO: Return room error to client
 					log.Println(err)
 				} else {
-					room.addClient(client)
+					room.addClient(client, "")
 				}
 			} else {
 				// TODO: Room does not exist, return room error to client

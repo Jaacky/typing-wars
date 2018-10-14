@@ -48,7 +48,7 @@ type Client struct {
 	Room   *Room
 
 	// Buffered channel of outbound messages.
-	send chan []byte
+	send chan *[]byte
 	done chan bool
 
 	Player *Player
@@ -64,7 +64,7 @@ func NewClient(conn *websocket.Conn, server *Server) *Client {
 		ID:     id,
 		Conn:   conn,
 		Server: server,
-		send:   make(chan []byte, 256),
+		send:   make(chan *[]byte, 256),
 		done:   make(chan bool),
 	}
 }
@@ -132,24 +132,28 @@ func (client *Client) listenWrite() {
 				return
 			}
 
-			w, err := client.Conn.NextWriter(websocket.TextMessage)
+			err := client.Conn.WriteMessage(websocket.BinaryMessage, *message)
 			if err != nil {
-				client.done <- true
-				return
+				log.Println("Client error writing message")
 			}
-			w.Write(message)
+			// w, err := client.Conn.NextWriter(websocket.TextMessage)
+			// if err != nil {
+			// 	client.done <- true
+			// 	return
+			// }
+			// w.Write(message)
 
-			// Add queued chat messages to the current websocket message.
-			n := len(client.send)
-			for i := 0; i < n; i++ {
-				w.Write(newline)
-				w.Write(<-client.send)
-			}
+			// // Add queued chat messages to the current websocket message.
+			// n := len(client.send)
+			// for i := 0; i < n; i++ {
+			// 	w.Write(newline)
+			// 	w.Write(<-client.send)
+			// }
 
-			if err := w.Close(); err != nil {
-				client.done <- true
-				return
-			}
+			// if err := w.Close(); err != nil {
+			// 	client.done <- true
+			// 	return
+			// }
 		case <-ticker.C:
 			client.Conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if err := client.Conn.WriteMessage(websocket.PingMessage, nil); err != nil {
@@ -185,7 +189,10 @@ func (client *Client) unmarshalUserMessage(data []byte) {
 		log.Println("UserMessage - UserAction")
 	case *pb.UserMessage_CreateGameRequest:
 		log.Println("UserMessage - CreateGameRequest")
-		client.Server.roomCreateCh <- client.ID
+		client.Server.roomCreateCh <- &roomCreateRequest{
+			clientID: client.ID,
+			username: userMessage.GetCreateGameRequest().GetUsername(),
+		}
 	case *pb.UserMessage_JoinGameRequest:
 		log.Println("UserMessage - JoinGameRequest")
 		roomID, err := uuid.FromString(userMessage.GetJoinGameRequest().GetRoomId())
@@ -208,11 +215,12 @@ func (client *Client) tryToRegisterPlayer(registerPlayerMsg *pb.RegisterPlayer) 
 	log.Printf("Registering player: %s\n", username)
 }
 
-func (client *Client) SendMessage(message string) {
-	log.Printf("Sending message to client %d, message: %s\n", client.ID, message)
+func (client *Client) SendMessage(message proto.Message) {
+	log.Printf("Sending message to client %d, message: %s\n", client.ID, message.String())
 
 	select {
-	case client.send <- []byte(message):
+	// case client.send <- []byte(message):
+	case client.send <- marshalMessage(message):
 	default:
 		log.Printf("Default send message action")
 	}

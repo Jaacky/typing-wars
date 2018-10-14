@@ -34,11 +34,24 @@ message JoinGameRequest {
     string room_id = 2;
 }
 
+message Player {
+    string id = 1;
+    string username = 2;
+}
+
+message JoinGameAck {
+    string client_id = 1;
+    string room_id = 2;
+    map<string, Player> players = 3;
+    map<string, bool> readyStatus = 4;
+}
+
 message UserMessage {
     oneof content {
         UserAction userAction = 1;
         RegisterPlayer registerPlayer = 2;
         CreateGameRequest createGameRequest = 3;
         JoinGameRequest joinGameRequest = 4;
+        JoinGameAck joinGameAck = 5;
     }
 }
