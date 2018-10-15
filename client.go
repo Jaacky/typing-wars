@@ -109,6 +109,62 @@ func (client *Client) listenRead() {
 	}
 }
 
+func (client *Client) readFromWebSocket() {
+	messageType, data, err := client.Conn.ReadMessage()
+	if err != nil {
+		log.Println(err)
+		client.done <- true
+	} else if messageType != websocket.BinaryMessage {
+		log.Printf("Non binary message received, ignoring. Type: %d\n", messageType)
+	} else {
+		client.unmarshalUserMessage(data)
+	}
+}
+
+func (client *Client) unmarshalUserMessage(data []byte) {
+	userMessage := &pb.UserMessage{}
+
+	if err := proto.Unmarshal(data, userMessage); err != nil {
+		log.Fatalln("Failed to parse user message")
+		return
+	}
+
+	switch userMessageType := userMessage.Content.(type) {
+	case *pb.UserMessage_UserAction:
+		log.Println("UserMessage - UserAction")
+	case *pb.UserMessage_CreateGameRequest:
+		log.Println("UserMessage - CreateGameRequest")
+		client.Server.createRoomCh <- &createRoomRequest{
+			clientID: client.ID,
+			username: userMessage.GetCreateGameRequest().GetUsername(),
+		}
+	case *pb.UserMessage_JoinGameRequest:
+		log.Println("UserMessage - JoinGameRequest")
+		request := userMessage.GetJoinGameRequest()
+		roomID, err := uuid.FromString(request.GetRoomId())
+		if err != nil {
+			// TODO: Return error to client
+			log.Println("Join Game Request - Unable to parse ID from string")
+			return
+		}
+		client.Server.joinRoomCh <- &joinRoomRequest{
+			roomID:   roomID,
+			clientID: client.ID,
+			username: request.GetUsername(),
+		}
+	case *pb.UserMessage_RegisterPlayer:
+		log.Println("UserMessage - RegisterPlayer")
+		client.tryToRegisterPlayer(userMessage.GetRegisterPlayer())
+	default:
+		log.Printf("Unknown message type %T\n", userMessageType)
+	}
+}
+
+func (client *Client) tryToRegisterPlayer(registerPlayerMsg *pb.RegisterPlayer) {
+	username := strings.TrimSpace(registerPlayerMsg.GetUsername())
+	log.Printf("Registering player: %s\n", username)
+}
+
 func (client *Client) listenWrite() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
@@ -164,55 +220,13 @@ func (client *Client) listenWrite() {
 	}
 }
 
-func (client *Client) readFromWebSocket() {
-	messageType, data, err := client.Conn.ReadMessage()
+func marshalMessage(message proto.Message) *[]byte {
+	bytes, err := proto.Marshal(message)
 	if err != nil {
-		log.Println(err)
-		client.done <- true
-	} else if messageType != websocket.BinaryMessage {
-		log.Printf("Non binary message received, ignoring. Type: %d\n", messageType)
-	} else {
-		client.unmarshalUserMessage(data)
-	}
-}
-
-func (client *Client) unmarshalUserMessage(data []byte) {
-	userMessage := &pb.UserMessage{}
-
-	if err := proto.Unmarshal(data, userMessage); err != nil {
-		log.Fatalln("Failed to parse user message")
-		return
+		panic(err)
 	}
 
-	switch userMessageType := userMessage.Content.(type) {
-	case *pb.UserMessage_UserAction:
-		log.Println("UserMessage - UserAction")
-	case *pb.UserMessage_CreateGameRequest:
-		log.Println("UserMessage - CreateGameRequest")
-		client.Server.roomCreateCh <- &roomCreateRequest{
-			clientID: client.ID,
-			username: userMessage.GetCreateGameRequest().GetUsername(),
-		}
-	case *pb.UserMessage_JoinGameRequest:
-		log.Println("UserMessage - JoinGameRequest")
-		roomID, err := uuid.FromString(userMessage.GetJoinGameRequest().GetRoomId())
-		if err != nil {
-			// TODO: Return error to client
-			log.Println("Join Game Request - Unable to parse ID from string")
-			return
-		}
-		client.Server.roomJoinCh <- roomJoinRequest{roomID: roomID, clientID: client.ID}
-	case *pb.UserMessage_RegisterPlayer:
-		log.Println("UserMessage - RegisterPlayer")
-		client.tryToRegisterPlayer(userMessage.GetRegisterPlayer())
-	default:
-		log.Printf("Unknown message type %T\n", userMessageType)
-	}
-}
-
-func (client *Client) tryToRegisterPlayer(registerPlayerMsg *pb.RegisterPlayer) {
-	username := strings.TrimSpace(registerPlayerMsg.GetUsername())
-	log.Printf("Registering player: %s\n", username)
+	return &bytes
 }
 
 func (client *Client) SendMessage(message proto.Message) {

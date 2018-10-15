@@ -9,12 +9,12 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type roomCreateRequest struct {
+type createRoomRequest struct {
 	clientID uuid.UUID
 	username string
 }
 
-type roomJoinRequest struct {
+type joinRoomRequest struct {
 	clientID uuid.UUID
 	username string
 	roomID   uuid.UUID
@@ -25,8 +25,8 @@ type Server struct {
 	clients  map[uuid.UUID]*Client
 	upgrader *websocket.Upgrader
 
-	roomCreateCh chan *roomCreateRequest
-	roomJoinCh   chan roomJoinRequest
+	createRoomCh chan *createRoomRequest
+	joinRoomCh   chan *joinRoomRequest
 }
 
 func NewServer() *Server {
@@ -38,8 +38,8 @@ func NewServer() *Server {
 			WriteBufferSize: 1024,
 			CheckOrigin:     func(r *http.Request) bool { return true },
 		},
-		roomCreateCh: make(chan *roomCreateRequest),
-		roomJoinCh:   make(chan roomJoinRequest),
+		createRoomCh: make(chan *createRoomRequest),
+		joinRoomCh:   make(chan *joinRoomRequest),
 	}
 }
 
@@ -80,8 +80,8 @@ func (server *Server) Listen() {
 func (server *Server) manageRooms() {
 	for {
 		select {
-		case request := <-server.roomCreateCh:
-			log.Printf("Client %s creating room", request.clientID)
+		case request := <-server.createRoomCh:
+			log.Printf("Client %s %s creating room", request.username, request.clientID)
 			client := server.clients[request.clientID]
 			room := NewRoom()
 			err := client.SetRoom(room)
@@ -92,7 +92,7 @@ func (server *Server) manageRooms() {
 				server.addRoom(room)
 				room.addClient(client, request.username)
 			}
-		case request := <-server.roomJoinCh:
+		case request := <-server.joinRoomCh:
 			log.Printf("Client %s %s joining room %s", request.username, request.clientID, request.roomID)
 			client := server.clients[request.clientID]
 			room, ok := server.rooms[request.roomID]
@@ -102,10 +102,11 @@ func (server *Server) manageRooms() {
 					// TODO: Return room error to client
 					log.Println(err)
 				} else {
-					room.addClient(client, "")
+					room.addClient(client, request.username)
 				}
 			} else {
 				// TODO: Room does not exist, return room error to client
+				log.Println("Room does not exist")
 			}
 
 		}

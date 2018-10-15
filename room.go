@@ -36,6 +36,18 @@ func (room *Room) addClient(client *Client, username string) {
 	room.players[client.ID] = currentPlayer
 	room.readyStatus[client.ID] = false
 
+	joinGameAck := &pb.JoinGameAck{
+		ClientId: fmt.Sprintf("%s", client.ID),
+	}
+
+	joinGameAckMessage := &pb.UserMessage{
+		Content: &pb.UserMessage_JoinGameAck{
+			JoinGameAck: joinGameAck,
+		},
+	}
+
+	room.SendToClient(client.ID, joinGameAckMessage)
+
 	pbPlayers := make(map[string]*pb.Player)
 	pbReadyStatus := make(map[string]bool)
 	for id, player := range room.players {
@@ -49,20 +61,19 @@ func (room *Room) addClient(client *Client, username string) {
 		pbReadyStatus[idString] = room.readyStatus[id]
 	}
 
-	joinGameAck := &pb.JoinGameAck{
-		ClientId:    fmt.Sprintf("%s", client.ID),
+	updateRoom := &pb.UpdateRoom{
 		RoomId:      fmt.Sprintf("%s", room.ID),
 		Players:     pbPlayers,
 		ReadyStatus: pbReadyStatus,
 	}
 
-	message := &pb.UserMessage{
-		Content: &pb.UserMessage_JoinGameAck{
-			JoinGameAck: joinGameAck,
+	updateRoomMessage := &pb.UserMessage{
+		Content: &pb.UserMessage_UpdateRoom{
+			UpdateRoom: updateRoom,
 		},
 	}
 
-	room.SendToAllClients(message)
+	room.SendToAllClients(updateRoomMessage)
 }
 
 func (room *Room) SendToClient(clientID uuid.UUID, message proto.Message) {
@@ -79,13 +90,4 @@ func (room *Room) SendToAllClients(message proto.Message) {
 	for _, client := range room.clients {
 		client.SendMessage(message)
 	}
-}
-
-func marshalMessage(message proto.Message) *[]byte {
-	bytes, err := proto.Marshal(message)
-	if err != nil {
-		panic(err)
-	}
-
-	return &bytes
 }
