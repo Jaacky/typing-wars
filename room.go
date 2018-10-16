@@ -36,17 +36,17 @@ func (room *Room) addClient(client *Client, username string) {
 	room.players[client.ID] = currentPlayer
 	room.readyStatus[client.ID] = false
 
-	joinGameAck := &pb.JoinGameAck{
+	joinRoomAck := &pb.JoinRoomAck{
 		ClientId: fmt.Sprintf("%s", client.ID),
 	}
 
-	joinGameAckMessage := &pb.UserMessage{
-		Content: &pb.UserMessage_JoinGameAck{
-			JoinGameAck: joinGameAck,
+	joinRoomAckMessage := &pb.UserMessage{
+		Content: &pb.UserMessage_JoinRoomAck{
+			JoinRoomAck: joinRoomAck,
 		},
 	}
 
-	room.SendToClient(client.ID, joinGameAckMessage)
+	room.SendToClient(client.ID, joinRoomAckMessage)
 
 	pbPlayers := make(map[string]*pb.Player)
 	pbReadyStatus := make(map[string]bool)

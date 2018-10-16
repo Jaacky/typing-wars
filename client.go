@@ -132,19 +132,19 @@ func (client *Client) unmarshalUserMessage(data []byte) {
 	switch userMessageType := userMessage.Content.(type) {
 	case *pb.UserMessage_UserAction:
 		log.Println("UserMessage - UserAction")
-	case *pb.UserMessage_CreateGameRequest:
-		log.Println("UserMessage - CreateGameRequest")
+	case *pb.UserMessage_CreateRoomRequest:
+		log.Println("UserMessage - CreateRoomRequest")
 		client.Server.createRoomCh <- &createRoomRequest{
 			clientID: client.ID,
-			username: userMessage.GetCreateGameRequest().GetUsername(),
+			username: userMessage.GetCreateRoomRequest().GetUsername(),
 		}
-	case *pb.UserMessage_JoinGameRequest:
-		log.Println("UserMessage - JoinGameRequest")
-		request := userMessage.GetJoinGameRequest()
+	case *pb.UserMessage_JoinRoomRequest:
+		log.Println("UserMessage - JoinRoomRequest")
+		request := userMessage.GetJoinRoomRequest()
 		roomID, err := uuid.FromString(request.GetRoomId())
 		if err != nil {
 			// TODO: Return error to client
-			log.Println("Join Game Request - Unable to parse ID from string")
+			log.Println("Join Room Request - Unable to parse ID from string")
 			return
 		}
 		client.Server.joinRoomCh <- &joinRoomRequest{
