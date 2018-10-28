@@ -47,7 +47,19 @@ func (room *Room) addClient(client *Client, username string) {
 	}
 
 	room.SendToClient(client.ID, joinRoomAckMessage)
+	room.update()
+}
 
+func (room *Room) updatePlayerReady(clientID uuid.UUID, readyStatus bool) {
+	log.Println("Updating player ready status for client %s", clientID)
+	if _, ok := room.readyStatus[clientID]; ok {
+		room.readyStatus[clientID] = readyStatus
+		log.Printf("Updated client: %s ready status to: %t", clientID, readyStatus)
+		room.update()
+	}
+}
+
+func (room *Room) update() {
 	pbPlayers := make(map[string]*pb.Player)
 	pbReadyStatus := make(map[string]bool)
 	for id, player := range room.players {

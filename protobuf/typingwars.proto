@@ -38,6 +38,10 @@ message UpdateRoom {
     map<string, bool> readyStatus = 3;
 }
 
+message UpdatePlayerReady {
+    bool ready_status = 2;
+}
+
 message UserMessage {
     oneof content {
         UserAction userAction = 1;
@@ -46,5 +50,6 @@ message UserMessage {
         JoinRoomRequest joinRoomRequest = 4;
         JoinRoomAck joinRoomAck = 5;
         UpdateRoom updateRoom = 6;
+        UpdatePlayerReady updatePlayerReady = 7;
     }
 }
