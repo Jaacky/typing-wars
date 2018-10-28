@@ -45,7 +45,7 @@ func (room *Room) addClient(client *Client, username string) {
 	room.players[client.ID] = currentPlayer
 	room.playerStatuses[client.ID] = &playerStatus{
 		ready: false,
-		index: room.totalPlayers,
+		index: room.totalPlayers - 1, // 0 indexed
 	}
 
 	joinRoomAck := &pb.JoinRoomAck{
@@ -63,7 +63,7 @@ func (room *Room) addClient(client *Client, username string) {
 }
 
 func (room *Room) updatePlayerReady(clientID uuid.UUID, readyStatus bool) {
-	log.Println("Updating player ready status for client %s", clientID)
+	log.Printf("Updating player ready status for client %s", clientID)
 	if _, ok := room.playerStatuses[clientID]; ok {
 		status := room.playerStatuses[clientID]
 		status.ready = readyStatus
