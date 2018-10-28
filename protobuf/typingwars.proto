@@ -32,10 +32,15 @@ message JoinRoomAck {
     string client_id = 1;
 }
 
+message PlayerStatus {
+    bool ready = 1;
+    int32 index = 2;
+}
+
 message UpdateRoom {
     string room_id = 1;
     map<string, Player> players = 2;
-    map<string, bool> readyStatus = 3;
+    map<string, PlayerStatus> player_statuses = 3;
 }
 
 message UpdatePlayerReady {

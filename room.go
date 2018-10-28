@@ -9,11 +9,17 @@ import (
 	"github.com/golang/protobuf/proto"
 )
 
+type playerStatus struct {
+	ready bool
+	index int32
+}
+
 type Room struct {
-	ID          uuid.UUID
-	clients     map[uuid.UUID]*Client
-	players     map[uuid.UUID]*Player
-	readyStatus map[uuid.UUID]bool
+	ID             uuid.UUID
+	clients        map[uuid.UUID]*Client
+	players        map[uuid.UUID]*Player
+	playerStatuses map[uuid.UUID]*playerStatus
+	totalPlayers   int32
 }
 
 func NewRoom() *Room {
@@ -23,18 +29,24 @@ func NewRoom() *Room {
 	}
 
 	return &Room{
-		ID:          id,
-		clients:     make(map[uuid.UUID]*Client),
-		players:     make(map[uuid.UUID]*Player),
-		readyStatus: make(map[uuid.UUID]bool),
+		ID:             id,
+		clients:        make(map[uuid.UUID]*Client),
+		players:        make(map[uuid.UUID]*Player),
+		playerStatuses: make(map[uuid.UUID]*playerStatus),
+		totalPlayers:   0,
 	}
 }
 
 func (room *Room) addClient(client *Client, username string) {
+	room.totalPlayers += 1
+
 	currentPlayer := NewPlayer(client.ID, username)
 	room.clients[client.ID] = client
 	room.players[client.ID] = currentPlayer
-	room.readyStatus[client.ID] = false
+	room.playerStatuses[client.ID] = &playerStatus{
+		ready: false,
+		index: room.totalPlayers,
+	}
 
 	joinRoomAck := &pb.JoinRoomAck{
 		ClientId: fmt.Sprintf("%s", client.ID),
@@ -52,8 +64,9 @@ func (room *Room) addClient(client *Client, username string) {
 
 func (room *Room) updatePlayerReady(clientID uuid.UUID, readyStatus bool) {
 	log.Println("Updating player ready status for client %s", clientID)
-	if _, ok := room.readyStatus[clientID]; ok {
-		room.readyStatus[clientID] = readyStatus
+	if _, ok := room.playerStatuses[clientID]; ok {
+		status := room.playerStatuses[clientID]
+		status.ready = readyStatus
 		log.Printf("Updated client: %s ready status to: %t", clientID, readyStatus)
 		room.update()
 	}
@@ -61,22 +74,29 @@ func (room *Room) updatePlayerReady(clientID uuid.UUID, readyStatus bool) {
 
 func (room *Room) update() {
 	pbPlayers := make(map[string]*pb.Player)
-	pbReadyStatus := make(map[string]bool)
+	pbPlayerStatuses := make(map[string]*pb.PlayerStatus)
 	for id, player := range room.players {
 		idString := id.String()
+		playerStatus := room.playerStatuses[id]
+
 		pbPlayer := &pb.Player{
 			Id:       idString,
 			Username: player.Username,
 		}
-
+		pbPlayerStatus := &pb.PlayerStatus{
+			Ready: playerStatus.ready,
+			Index: playerStatus.index,
+		}
+		log.Printf("client: %s - playerstatus: %v", idString, playerStatus)
+		log.Printf("Player: %s - pbPlayerStatus.Ready: %t, pbPlayerStatus.Index: %d, pbplayerstatus: %v", idString, pbPlayerStatus.Ready, pbPlayerStatus.Index, pbPlayerStatus)
 		pbPlayers[idString] = pbPlayer
-		pbReadyStatus[idString] = room.readyStatus[id]
+		pbPlayerStatuses[idString] = pbPlayerStatus
 	}
 
 	updateRoom := &pb.UpdateRoom{
-		RoomId:      fmt.Sprintf("%s", room.ID),
-		Players:     pbPlayers,
-		ReadyStatus: pbReadyStatus,
+		RoomId:         fmt.Sprintf("%s", room.ID),
+		Players:        pbPlayers,
+		PlayerStatuses: pbPlayerStatuses,
 	}
 
 	updateRoomMessage := &pb.UserMessage{
