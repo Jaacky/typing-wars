@@ -155,6 +155,8 @@ func (client *Client) unmarshalUserMessage(data []byte) {
 	case *pb.UserMessage_UpdatePlayerReady:
 		log.Println("UserMessage - ReadyPlayer")
 		client.Room.updatePlayerReady(client.ID, userMessage.GetUpdatePlayerReady().GetReadyStatus())
+	case *pb.UserMessage_StartGameRequest:
+		client.Room.start()
 	case *pb.UserMessage_RegisterPlayer:
 		log.Println("UserMessage - RegisterPlayer")
 		client.tryToRegisterPlayer(userMessage.GetRegisterPlayer())

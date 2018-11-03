@@ -41,10 +41,19 @@ message UpdateRoom {
     string room_id = 1;
     map<string, Player> players = 2;
     map<string, PlayerStatus> player_statuses = 3;
+    bool start_flag = 4;
 }
 
 message UpdatePlayerReady {
     bool ready_status = 2;
+}
+
+message StartGameRequest {
+
+}
+
+message StartGameAck {
+
 }
 
 message UserMessage {
@@ -56,5 +65,7 @@ message UserMessage {
         JoinRoomAck joinRoomAck = 5;
         UpdateRoom updateRoom = 6;
         UpdatePlayerReady updatePlayerReady = 7;
+        StartGameRequest startGameRequest = 8;
+        StartGameAck startGameAck = 9;
     }
 }

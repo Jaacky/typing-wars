@@ -22,6 +22,8 @@ type Room struct {
 	totalPlayers   int32
 }
 
+const MAX_PLAYERS = 2
+
 func NewRoom() *Room {
 	id, err := uuid.NewV4()
 	if err != nil {
@@ -38,6 +40,11 @@ func NewRoom() *Room {
 }
 
 func (room *Room) addClient(client *Client, username string) {
+	if room.totalPlayers >= MAX_PLAYERS {
+		// TODO: Return full room error to client
+		return
+	}
+
 	room.totalPlayers += 1
 
 	currentPlayer := NewPlayer(client.ID, username)
@@ -72,12 +79,24 @@ func (room *Room) updatePlayerReady(clientID uuid.UUID, readyStatus bool) {
 	}
 }
 
+func (room *Room) start() {
+	startGameMessage := &pb.UserMessage{
+		Content: &pb.UserMessage_StartGameAck{
+			StartGameAck: &pb.StartGameAck{},
+		},
+	}
+
+	room.SendToAllClients(startGameMessage)
+}
+
 func (room *Room) update() {
 	pbPlayers := make(map[string]*pb.Player)
 	pbPlayerStatuses := make(map[string]*pb.PlayerStatus)
+	startFlag := true
 	for id, player := range room.players {
 		idString := id.String()
 		playerStatus := room.playerStatuses[id]
+		startFlag = startFlag && playerStatus.ready
 
 		pbPlayer := &pb.Player{
 			Id:       idString,
@@ -93,10 +112,12 @@ func (room *Room) update() {
 		pbPlayerStatuses[idString] = pbPlayerStatus
 	}
 
+	startFlag = startFlag && room.totalPlayers == MAX_PLAYERS
 	updateRoom := &pb.UpdateRoom{
 		RoomId:         fmt.Sprintf("%s", room.ID),
 		Players:        pbPlayers,
 		PlayerStatuses: pbPlayerStatuses,
+		StartFlag:      startFlag,
 	}
 
 	updateRoomMessage := &pb.UserMessage{
