@@ -1,79 +1,47 @@
 package typingwars
 
-// import "github.com/gofrs/uuid"
+import "github.com/gofrs/uuid"
 
-// type baseBuilding struct {
-// 	Owner    uuid.UUID
-// 	Hp       int
-// 	Colour   string
-// 	Position [2]int
-// }
+// Game strcut
+type Game struct {
+	Clients         map[uuid.UUID]*Client
+	Space           *Space
+	InGame          bool
+	EventDispatcher *EventDispatcher
+	physicsTicker   *PhysicsTicker
+	unitSpawner     *UnitSpawner
+}
 
-// type unit struct {
-// 	Owner   uuid.UUID
-// 	Word    string
-// 	Typed   string
-// 	Remains string
-// }
+// NewGame struct
+func NewGame(room *Room) *Game {
+	// bases := []*baseBuilding{}
+	clients := room.clients
+	space := NewSpace(clients)
 
-// // Game strcut
-// type Game struct {
-// 	Clients         map[uuid.UUID]*Client
-// 	Bases           map[uuid.UUID]*baseBuilding
-// 	Units           map[uuid.UUID]*map[string]*unit // { ClientID: { Word: Unit } ... }
-// 	InGame          bool
-// 	EventDispatcher *EventDispatcher
-// 	physicsTicker   *PhysicsTicker
-// 	unitSpawner     *UnitSpawner
-// }
+	eventDispatcher := NewEventDispatcher()
+	physicsTicker := NewPhysicsTicker(eventDispatcher)
+	unitSpawner := NewUnitSpawner(eventDispatcher)
 
-// // NewGame struct
-// func NewGame(clients map[uuid.UUID]*Client) *Game {
-// 	// bases := []*baseBuilding{}
-// 	bases := make(map[uuid.UUID]*baseBuilding)
-// 	units := make(map[uuid.UUID]*map[string]*unit)
+	updater := NewUpdater(space, eventDispatcher)
+	eventDispatcher.RegisterTimeTickListener(updater)
+	eventDispatcher.RegisterUnitSpawnedListener(updater)
 
-// 	i := 0
-// 	for _, client := range clients {
-// 		// client := clients[i]
-// 		var position [2]int
+	eventDispatcher.RegisterPhysicsReadyListener(room)
 
-// 		if i == 0 {
-// 			position = [2]int{5, 50}
-// 		} else {
-// 			position = [2]int{95, 50}
-// 		}
+	return &Game{
+		Space:           space,
+		Clients:         clients,
+		EventDispatcher: eventDispatcher,
+		physicsTicker:   physicsTicker,
+		unitSpawner:     unitSpawner,
+	}
+}
 
-// 		base := &baseBuilding{Owner: client.ID, Hp: 50, Colour: "#000", Position: position}
-// 		bases[client.ID] = base
+func (g *Game) start() {
+	go g.EventDispatcher.RunEventLoop()
+	go g.physicsTicker.Run()
+	go g.unitSpawner.Run(g.Space)
+	for {
 
-// 		pUnits := make(map[string]*unit)
-// 		units[client.ID] = &pUnits
-// 		i++
-// 	}
-
-// 	gameMap := NewMap(clients)
-
-// 	eventDispatcher := NewEventDispatcher()
-// 	physicsTicker := NewPhysicsTicker(eventDispatcher)
-// 	unitSpawner := NewUnitSpawner(eventDispatcher)
-
-// 	updater := NewUpdater()
-// 	eventDispatcher.RegisterTimeTickListener(updater)
-// 	eventDispatcher.RegisterUnitSpawnedListener(updater)
-
-// 	return &Game{
-// 		Bases:           bases,
-// 		Units:           units,
-// 		Clients:         clients,
-// 		EventDispatcher: eventDispatcher,
-// 		physicsTicker:   physicsTicker,
-// 		unitSpawner:     unitSpawner,
-// 	}
-// }
-
-// func (g *Game) start() {
-// 	go g.EventDispatcher.RunEventLoop()
-// 	go g.physicsTicker.Run()
-// 	go g.unitSpawner.Run()
-// }
+	}
+}

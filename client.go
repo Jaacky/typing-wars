@@ -235,7 +235,7 @@ func marshalMessage(message proto.Message) *[]byte {
 }
 
 func (client *Client) SendMessage(message proto.Message) {
-	log.Printf("Sending message to client %d, message: %s\n", client.ID, message.String())
+	log.Printf("Sending message to client %s, message: %s\n", client.ID.String(), message.String())
 
 	select {
 	// case client.send <- []byte(message):

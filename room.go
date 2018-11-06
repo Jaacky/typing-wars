@@ -20,6 +20,7 @@ type Room struct {
 	players        map[uuid.UUID]*Player
 	playerStatuses map[uuid.UUID]*playerStatus
 	totalPlayers   int32
+	game           *Game
 }
 
 const MAX_PLAYERS = 2
@@ -80,6 +81,8 @@ func (room *Room) updatePlayerReady(clientID uuid.UUID, readyStatus bool) {
 }
 
 func (room *Room) start() {
+	room.game = NewGame(room)
+
 	startGameMessage := &pb.UserMessage{
 		Content: &pb.UserMessage_StartGameAck{
 			StartGameAck: &pb.StartGameAck{},
@@ -87,6 +90,8 @@ func (room *Room) start() {
 	}
 
 	room.SendToAllClients(startGameMessage)
+	// room.game.EventDispatcher.RegisterPhysicsReadyListener(room)
+	room.game.start()
 }
 
 func (room *Room) update() {
@@ -127,6 +132,11 @@ func (room *Room) update() {
 	}
 
 	room.SendToAllClients(updateRoomMessage)
+}
+
+func (room *Room) HandlePhysicsReady(physicsReady *PhysicsReady) {
+	log.Println("Sending updated state to all clients")
+	room.SendToAllClients(room.game.Space.ToMessage())
 }
 
 func (room *Room) SendToClient(clientID uuid.UUID, message proto.Message) {

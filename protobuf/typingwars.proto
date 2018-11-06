@@ -56,16 +56,44 @@ message StartGameAck {
 
 }
 
+message Point {
+    float x = 1;
+    float y = 2;
+}
+
+message Base {
+    string owner = 1;
+    int32 hp = 2;
+    string colour = 3;
+    Point position = 4;
+}
+
+message Unit {
+    string owner = 1;
+    string word = 2;
+    uint32 typed = 3;
+    uint32 speed = 4;
+    Point position = 5;
+    uint32 size = 6;
+    Base target = 7;
+}
+
+message Space {
+    repeated Base bases = 1;
+    repeated Unit units = 2;
+}
+
 message UserMessage {
     oneof content {
-        UserAction userAction = 1;
-        RegisterPlayer registerPlayer = 2;
-        CreateRoomRequest createRoomRequest = 3;
-        JoinRoomRequest joinRoomRequest = 4;
-        JoinRoomAck joinRoomAck = 5;
-        UpdateRoom updateRoom = 6;
-        UpdatePlayerReady updatePlayerReady = 7;
-        StartGameRequest startGameRequest = 8;
-        StartGameAck startGameAck = 9;
+        Space space = 1;
+        UserAction userAction = 2;
+        RegisterPlayer registerPlayer = 3;
+        CreateRoomRequest createRoomRequest = 4;
+        JoinRoomRequest joinRoomRequest = 5;
+        JoinRoomAck joinRoomAck = 6;
+        UpdateRoom updateRoom = 7;
+        UpdatePlayerReady updatePlayerReady = 8;
+        StartGameRequest startGameRequest = 9;
+        StartGameAck startGameAck = 10;
     }
 }

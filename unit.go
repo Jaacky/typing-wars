@@ -1,20 +1,42 @@
 package typingwars
 
+import (
+	"github.com/Jaacky/typingwars/pb"
+	"github.com/Jaacky/typingwars/types"
+	"github.com/gofrs/uuid"
+)
+
 // Unit struct describes a word unit
 type Unit struct {
-	UnitSize uint32
-	X        uint32
-	Y        uint32
+	Owner    uuid.UUID
+	Size     uint32
+	Position *types.Point
 	Word     string
 	Typed    uint32
+	Speed    uint32
+	Target   *Base
 }
 
-func NewUnit(word string, x uint32, y uint32) *Unit {
+func NewUnit(id uuid.UUID, word string, position *types.Point, speed uint32, target *Base) *Unit {
 	return &Unit{
-		UnitSize: 3,
-		X:        x,
-		Y:        y,
+		Owner:    id,
+		Size:     3,
+		Position: position,
 		Word:     word,
 		Typed:    0,
+		Speed:    speed,
+		Target:   target,
+	}
+}
+
+func (unit *Unit) ToProto() *pb.Unit {
+	return &pb.Unit{
+		Owner:    unit.Owner.String(),
+		Size:     unit.Size,
+		Position: unit.Position.ToProto(),
+		Word:     unit.Word,
+		Typed:    unit.Typed,
+		Speed:    unit.Speed,
+		Target:   unit.Target.ToProto(),
 	}
 }
