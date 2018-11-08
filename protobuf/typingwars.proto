@@ -72,7 +72,7 @@ message Unit {
     string owner = 1;
     string word = 2;
     uint32 typed = 3;
-    uint32 speed = 4;
+    float speed = 4;
     Point position = 5;
     uint32 size = 6;
     Base target = 7;
