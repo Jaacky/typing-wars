@@ -5,8 +5,6 @@ import (
 	"time"
 
 	"github.com/Jaacky/typingwars/constants"
-	"github.com/Jaacky/typingwars/types"
-	"github.com/gofrs/uuid"
 )
 
 type UnitSpawner struct {
@@ -24,23 +22,25 @@ func NewUnitSpawner(dispatcher *EventDispatcher, space *Space, teams []*Team) *U
 }
 
 func (spawner *UnitSpawner) Run() {
-	id, err := uuid.NewV4()
-	if err != nil {
-		log.Fatalf("Failed to generate uuid: %v", err)
-	}
-	testTarget := NewBase(id, types.NewPoint(95, 50))
 	word := "a"
 	for range time.Tick(constants.UnitSpawningInterval) {
 		log.Println("Spawning unit")
 		for _, base := range spawner.space.Bases {
-			log.Println("New unit")
-			unit := NewUnit(base.Owner, word, base.Position, 1, testTarget)
-			word += "a"
-			event := &UnitSpawned{
-				Unit: unit,
+			for _, team := range spawner.teams {
+				if _, ok := team.Players[base.Owner]; !ok {
+					for _, player := range team.Players {
+						target := spawner.space.Bases[player.ID]
+						log.Println("New unit")
+						unit := NewUnit(base.Owner, word, base.Position, 1, target)
+						word += "a"
+						event := &UnitSpawned{
+							Unit: unit,
+						}
+						log.Println("New unit event complete, about to fire")
+						spawner.eventDispatcher.FireUnitSpawned(event)
+					}
+				}
 			}
-			log.Println("New unit event complete, about to fire")
-			spawner.eventDispatcher.FireUnitSpawned(event)
 		}
 	}
 }
