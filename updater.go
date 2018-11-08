@@ -36,4 +36,5 @@ func (updater *Updater) updatePhysics() {
 
 func (updater *Updater) HandleUnitSpawned(unitSpawned *UnitSpawned) {
 	fmt.Printf("Unit is spawned, unit word is: %s\n", unitSpawned.Unit.Word)
+	updater.unitManager.addUnit(unitSpawned.Unit)
 }

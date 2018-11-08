@@ -13,11 +13,11 @@ type Unit struct {
 	Position *types.Point
 	Word     string
 	Typed    uint32
-	Speed    uint32
+	Speed    float32
 	Target   *Base
 }
 
-func NewUnit(id uuid.UUID, word string, position *types.Point, speed uint32, target *Base) *Unit {
+func NewUnit(id uuid.UUID, word string, position *types.Point, speed float32, target *Base) *Unit {
 	return &Unit{
 		Owner:    id,
 		Size:     3,
