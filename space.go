@@ -17,19 +17,14 @@ func NewSpace(clients map[uuid.UUID]*Client) *Space {
 
 	i := 0
 	for _, client := range clients {
-		// client := clients[i]
-		// var position [2]int
 		var position *types.Point
 
 		if i == 0 {
-			// position = [2]int{5, 50}
 			position = types.NewPoint(5, 50)
 		} else {
-			// position = [2]int{95, 50}
 			position = types.NewPoint(95, 50)
 		}
 
-		// base := &baseBuilding{Owner: client.ID, Hp: 50, Colour: "#000", Position: position}
 		base := NewBase(client.ID, position)
 		bases[client.ID] = base
 

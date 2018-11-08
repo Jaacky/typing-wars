@@ -41,6 +41,7 @@ func NewRoom() *Room {
 }
 
 func (room *Room) addClient(client *Client, username string) {
+	// TODO: Add a remove client function which gets called whenever client leaves/disconnects
 	if room.totalPlayers >= MAX_PLAYERS {
 		// TODO: Return full room error to client
 		return

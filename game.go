@@ -1,10 +1,15 @@
 package typingwars
 
-import "github.com/gofrs/uuid"
+import (
+	"log"
+
+	"github.com/gofrs/uuid"
+)
 
 // Game strcut
 type Game struct {
 	Clients         map[uuid.UUID]*Client
+	Teams           []*Team
 	Space           *Space
 	InGame          bool
 	EventDispatcher *EventDispatcher
@@ -16,11 +21,12 @@ type Game struct {
 func NewGame(room *Room) *Game {
 	// bases := []*baseBuilding{}
 	clients := room.clients
+	teams := makeTeams(clients, 2)
 	space := NewSpace(clients)
 
 	eventDispatcher := NewEventDispatcher()
 	physicsTicker := NewPhysicsTicker(eventDispatcher)
-	unitSpawner := NewUnitSpawner(eventDispatcher)
+	unitSpawner := NewUnitSpawner(eventDispatcher, space, teams)
 
 	updater := NewUpdater(space, eventDispatcher)
 	eventDispatcher.RegisterTimeTickListener(updater)
@@ -30,6 +36,7 @@ func NewGame(room *Room) *Game {
 
 	return &Game{
 		Space:           space,
+		Teams:           teams,
 		Clients:         clients,
 		EventDispatcher: eventDispatcher,
 		physicsTicker:   physicsTicker,
@@ -37,11 +44,27 @@ func NewGame(room *Room) *Game {
 	}
 }
 
+func makeTeams(clients map[uuid.UUID]*Client, numTeams int) []*Team {
+	teams := []*Team{}
+
+	for i := 0; i < numTeams; i++ {
+		teams = append(teams, NewTeam())
+		log.Printf("Team %d made!", i)
+	}
+
+	j := 0
+	for _, client := range clients {
+		teamNum := j % numTeams
+		log.Printf("Client to team %d!", teamNum)
+		teams[teamNum].AddPlayer(client)
+		j++
+	}
+
+	return teams
+}
+
 func (g *Game) start() {
 	go g.EventDispatcher.RunEventLoop()
 	go g.physicsTicker.Run()
-	go g.unitSpawner.Run(g.Space)
-	for {
-
-	}
+	go g.unitSpawner.Run()
 }
