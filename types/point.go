@@ -23,6 +23,10 @@ func (point *Point) Add(vector *Vector) *Point {
 	)
 }
 
+func (point *Point) Equal(other *Point) bool {
+	return *point == *other
+}
+
 func (point *Point) ToProto() *pb.Point {
 	return &pb.Point{
 		X: point.X,
