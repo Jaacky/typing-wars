@@ -27,6 +27,16 @@ func (point *Point) Equal(other *Point) bool {
 	return *point == *other
 }
 
+func (point *Point) GetXDirectionTo(other *Point) float32 {
+	if point.X > other.X {
+		return -1
+	} else if point.X < other.X {
+		return 1
+	} else {
+		return 1
+	}
+}
+
 func (point *Point) ToProto() *pb.Point {
 	return &pb.Point{
 		X: point.X,

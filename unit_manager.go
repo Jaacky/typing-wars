@@ -26,7 +26,7 @@ func (um *UnitManager) updateUnits() {
 			} else {
 				// TODO: Calculate vector to add to unit based off of unit's position and target's position
 				// This will do for now as units are only going straight across horizontally
-				velocity := types.NewVector(unit.Speed, 0)
+				velocity := types.NewVector(unit.Speed*unit.Position.GetXDirectionTo(unit.Target.Position), 0)
 				unit.Position = unit.Position.Add(velocity)
 			}
 		}
