@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Jaacky/typingwars/constants"
+	"github.com/Jaacky/typingwars/wordgenerator"
 )
 
 type UnitSpawner struct {
@@ -22,9 +23,10 @@ func NewUnitSpawner(dispatcher *EventDispatcher, space *Space, teams []*Team) *U
 }
 
 func (spawner *UnitSpawner) Run() {
-	word := "a"
+	wg := wordgenerator.NewWordGenerator()
 	for range time.Tick(constants.UnitSpawningInterval) {
 		log.Println("Spawning unit")
+		word := wg.GetWord()
 		for _, base := range spawner.space.Bases {
 			for _, team := range spawner.teams {
 				if _, ok := team.Players[base.Owner]; !ok {
@@ -32,7 +34,6 @@ func (spawner *UnitSpawner) Run() {
 						target := spawner.space.Bases[player.ID]
 						log.Println("New unit")
 						unit := NewUnit(base.Owner, word, base.Position, 1, target)
-						word += "a"
 						event := &UnitSpawned{
 							Unit: unit,
 						}

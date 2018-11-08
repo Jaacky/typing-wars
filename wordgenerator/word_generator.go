@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	WORD_FILE = "eff_large_wordlist.txt"
+	WORD_FILE = "./wordgenerator/eff_large_wordlist.txt"
 )
 
 type WordGenerator struct {
