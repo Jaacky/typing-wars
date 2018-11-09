@@ -66,6 +66,21 @@ func (handler *unitSpawnedHandler) handle() {
 	log.Println("Unit spawner handler finished handling")
 }
 
+type UserActionListener interface {
+	HandleUserAction(*UserAction)
+}
+
+type userActionHandler struct {
+	event          *UserAction
+	eventListeners []UserActionListener
+}
+
+func (handler *userActionHandler) handle() {
+	for _, listener := range handler.eventListeners {
+		listener.HandleUserAction(handler.event)
+	}
+}
+
 // EventDispatcher comment
 type EventDispatcher struct {
 	running bool
@@ -75,6 +90,7 @@ type EventDispatcher struct {
 	timeTickListeners     []TimeTickListener
 	unitSpawnedListeners  []UnitSpawnedListener
 	physicsReadyListeners []PhysicsReadyListener
+	userActionListeners   []UserActionListener
 }
 
 // NewEventDispatcher comment
@@ -85,6 +101,7 @@ func NewEventDispatcher() *EventDispatcher {
 		timeTickListeners:     []TimeTickListener{},
 		unitSpawnedListeners:  []UnitSpawnedListener{},
 		physicsReadyListeners: []PhysicsReadyListener{},
+		userActionListeners:   []UserActionListener{},
 	}
 }
 
@@ -145,4 +162,17 @@ func (dispatcher *EventDispatcher) FirePhysicsReady(physicsReady *PhysicsReady) 
 
 	dispatcher.eventQueue <- handler
 	log.Println("Physics ready fired")
+}
+
+func (dispatcher *EventDispatcher) RegisterUserActionListener(listener UserActionListener) {
+	dispatcher.userActionListeners = append(dispatcher.userActionListeners, listener)
+}
+
+func (dispatcher *EventDispatcher) FireUserAction(userAction *UserAction) {
+	handler := &userActionHandler{
+		event:          userAction,
+		eventListeners: dispatcher.userActionListeners,
+	}
+
+	dispatcher.eventQueue <- handler
 }

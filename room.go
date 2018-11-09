@@ -20,6 +20,7 @@ type Room struct {
 	players        map[uuid.UUID]*Player
 	playerStatuses map[uuid.UUID]*playerStatus
 	totalPlayers   int32
+	InGame         bool
 	game           *Game
 }
 
@@ -93,6 +94,7 @@ func (room *Room) start() {
 	room.SendToAllClients(startGameMessage)
 	// room.game.EventDispatcher.RegisterPhysicsReadyListener(room)
 	room.game.start()
+	room.InGame = true
 }
 
 func (room *Room) update() {

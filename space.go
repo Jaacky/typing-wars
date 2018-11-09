@@ -7,8 +7,9 @@ import (
 )
 
 type Space struct {
-	Bases map[uuid.UUID]*Base
-	Units map[uuid.UUID]*map[string]*Unit // { ClientID: { Word: Unit } ... }
+	Bases    map[uuid.UUID]*Base
+	Units    map[uuid.UUID]*map[string]*Unit // { ClientID: { Word: Unit } ... }
+	Targeted map[uuid.UUID]*Unit
 }
 
 func NewSpace(clients map[uuid.UUID]*Client) *Space {
@@ -34,8 +35,9 @@ func NewSpace(clients map[uuid.UUID]*Client) *Space {
 	}
 
 	return &Space{
-		Bases: bases,
-		Units: units,
+		Bases:    bases,
+		Units:    units,
+		Targeted: make(map[uuid.UUID]*Unit),
 	}
 }
 

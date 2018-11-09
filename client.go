@@ -132,6 +132,14 @@ func (client *Client) unmarshalUserMessage(data []byte) {
 	switch userMessageType := userMessage.Content.(type) {
 	case *pb.UserMessage_UserAction:
 		log.Println("UserMessage - UserAction")
+		room := client.Room
+		if !room.InGame {
+			log.Println("Warning - UserMessage - UserAction received but not in game")
+			return
+		}
+		userInput := userMessage.GetUserAction().GetUserInput()
+		log.Printf("User input: %v", userInput)
+		room.game.EventDispatcher.FireUserAction(&UserAction{Owner: client.ID, Key: "a"})
 	case *pb.UserMessage_CreateRoomRequest:
 		log.Println("UserMessage - CreateRoomRequest")
 		client.Server.createRoomCh <- &createRoomRequest{

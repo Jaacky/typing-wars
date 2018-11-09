@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/Jaacky/typingwars/types"
+	"github.com/gofrs/uuid"
 )
 
 type UnitManager struct {
@@ -41,5 +42,43 @@ func (um *UnitManager) addUnit(unit *Unit) {
 		log.Printf("All units now: %v", um.space.Units)
 	} else {
 		log.Printf("Unit with word already exists")
+	}
+}
+
+func (um *UnitManager) destroyUnit(owner uuid.UUID, unit *Unit) {
+	delete(um.space.Targeted, owner)
+	delete(*um.space.Units[owner], unit.Word)
+}
+
+func (um *UnitManager) doDamage(unit *Unit, key string) {
+	if string(unit.Word[unit.Typed]) != key {
+		return
+	}
+	unit.Typed++
+	if len(unit.Word) == int(unit.Typed) {
+		um.destroyUnit(unit.Owner, unit)
+	}
+}
+
+func (um *UnitManager) Damage(owner uuid.UUID, key string) {
+	units := *um.space.Units[owner]
+	// If the owner has no units
+	if len(units) == 0 {
+		return
+	}
+
+	// If the owner has already acquired a target
+	if unit, ok := um.space.Targeted[owner]; ok {
+		um.doDamage(unit, key)
+		return
+	}
+
+	// Acquire a target
+	for word, unit := range units {
+		if string(word[0]) == key {
+			um.space.Targeted[owner] = unit
+			um.doDamage(unit, key)
+			return
+		}
 	}
 }

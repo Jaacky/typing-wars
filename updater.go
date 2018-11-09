@@ -30,11 +30,12 @@ func (updater *Updater) updatePhysics() {
 	updater.eventDispatcher.FirePhysicsReady(&PhysicsReady{})
 }
 
-// func (updater *Updater) HandlePhysicsReady(physicsReady *PhysicsReady) {
-
-// }
-
 func (updater *Updater) HandleUnitSpawned(unitSpawned *UnitSpawned) {
 	fmt.Printf("Unit is spawned, unit word is: %s\n", unitSpawned.Unit.Word)
 	updater.unitManager.addUnit(unitSpawned.Unit)
+}
+
+func (updater *Updater) HandleUserAction(userAction *UserAction) {
+	log.Println("User action handling")
+	updater.unitManager.Damage(userAction.Owner, userAction.Key)
 }
