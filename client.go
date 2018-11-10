@@ -138,8 +138,8 @@ func (client *Client) unmarshalUserMessage(data []byte) {
 			return
 		}
 		userInput := userMessage.GetUserAction().GetUserInput()
-		log.Printf("User input: %v", userInput)
-		room.game.EventDispatcher.FireUserAction(&UserAction{Owner: client.ID, Key: "a"})
+		// log.Printf("User input: %v", userInput)
+		room.game.EventDispatcher.FireUserAction(&UserAction{Owner: client.ID, Key: userInput.GetKey()})
 	case *pb.UserMessage_CreateRoomRequest:
 		log.Println("UserMessage - CreateRoomRequest")
 		client.Server.createRoomCh <- &createRoomRequest{
@@ -243,7 +243,7 @@ func marshalMessage(message proto.Message) *[]byte {
 }
 
 func (client *Client) SendMessage(message proto.Message) {
-	log.Printf("Sending message to client %s, message: %s\n", client.ID.String(), message.String())
+	// log.Printf("Sending message to client %s, message: %s\n", client.ID.String(), message.String())
 
 	select {
 	// case client.send <- []byte(message):

@@ -31,7 +31,7 @@ func NewGame(room *Room) *Game {
 	updater := NewUpdater(space, eventDispatcher)
 	eventDispatcher.RegisterTimeTickListener(updater)
 	eventDispatcher.RegisterUnitSpawnedListener(updater)
-
+	eventDispatcher.RegisterUserActionListener(updater)
 	eventDispatcher.RegisterPhysicsReadyListener(room)
 
 	return &Game{
