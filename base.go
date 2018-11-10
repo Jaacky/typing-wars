@@ -8,30 +8,27 @@ import (
 
 // Base struct
 type Base struct {
-	Owner    uuid.UUID
-	Size     uint32
-	Hp       int32
-	Colour   string
-	Position *types.Point
+	ObjectState
+	Hp     int32
+	Colour string
 }
 
 // NewBase initialization
 func NewBase(ownerID uuid.UUID, position *types.Point) *Base {
+	objectState := NewObjectState(ownerID, 6, position)
 	return &Base{
-		Owner:    ownerID,
-		Size:     6,
-		Hp:       50,
-		Colour:   "#fff",
-		Position: position,
+		ObjectState: *objectState,
+		Hp:          50,
+		Colour:      "#fff",
 	}
 }
 
 func (base *Base) ToProto() *pb.Base {
 	return &pb.Base{
-		Owner:    base.Owner.String(),
-		Size:     base.Size,
+		Owner:    base.Owner().String(),
+		Size:     base.Size(),
 		Hp:       base.Hp,
 		Colour:   base.Colour,
-		Position: base.Position.ToProto(),
+		Position: base.Position().ToProto(),
 	}
 }
