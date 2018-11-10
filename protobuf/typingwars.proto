@@ -2,12 +2,17 @@ syntax = "proto3";
 package typingwars;
 option go_package = "pb";
 
-enum UserInput {
-    KEY = 0;
+// enum UserInput {
+//     KEY = 0;
+// }
+
+message UserInput {
+    string key = 1;
 }
 
 message UserAction {
     UserInput userInput = 1;
+
 }
 
 message RegisterPlayer {
@@ -63,9 +68,10 @@ message Point {
 
 message Base {
     string owner = 1;
-    int32 hp = 2;
-    string colour = 3;
-    Point position = 4;
+    uint32 size = 2;
+    int32 hp = 3;
+    string colour = 4;
+    Point position = 5;
 }
 
 message Unit {
