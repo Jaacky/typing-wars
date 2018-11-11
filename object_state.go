@@ -34,3 +34,12 @@ func (objectState *ObjectState) Position() *types.Point {
 func (objectState *ObjectState) SetPosition(position *types.Point) {
 	objectState.position = position
 }
+
+// Assumes that objects are square with the position as it's center
+func (objectState *ObjectState) CollidesWith(other Object) bool {
+	v := types.NewVector(objectState.Position().X-other.Position().X,
+		objectState.Position().Y-other.Position().Y)
+	distance := v.Length()
+
+	return distance < float32(objectState.Size())/2+float32(other.Size())/2
+}

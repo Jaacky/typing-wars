@@ -27,6 +27,9 @@ func (um *UnitManager) updateUnits() {
 				// Need to detect collision instead of position
 				log.Println("Unit has arrived at target")
 				continue
+			} else if unit.CollidesWith(unit.Target) {
+				// log.Println("Collision!")
+				continue
 			} else {
 				// TODO: Calculate vector to add to unit based off of unit's position and target's position
 				// This will do for now as units are only going straight across horizontally
