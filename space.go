@@ -1,6 +1,7 @@
 package typingwars
 
 import (
+	"github.com/Jaacky/typingwars/constants"
 	"github.com/Jaacky/typingwars/pb"
 	"github.com/Jaacky/typingwars/types"
 	"github.com/gofrs/uuid"
@@ -21,9 +22,9 @@ func NewSpace(clients map[uuid.UUID]*Client) *Space {
 		var position *types.Point
 
 		if i == 0 {
-			position = types.NewPoint(5, 50)
+			position = types.NewPoint(constants.PlayerOneBaseXPosition, constants.PlayerOneBaseYPosition)
 		} else {
-			position = types.NewPoint(95, 50)
+			position = types.NewPoint(constants.PlayerTwoBaseXPosition, constants.PlayerTwoBaseYPosition)
 		}
 
 		base := NewBase(client.ID, position)

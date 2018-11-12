@@ -1,6 +1,7 @@
 package typingwars
 
 import (
+	"github.com/Jaacky/typingwars/constants"
 	"github.com/Jaacky/typingwars/pb"
 	"github.com/Jaacky/typingwars/types"
 	"github.com/gofrs/uuid"
@@ -16,7 +17,7 @@ type Unit struct {
 }
 
 func NewUnit(id uuid.UUID, word string, position *types.Point, speed float32, target *Base) *Unit {
-	objectState := NewObjectState(id, 3, position)
+	objectState := NewObjectState(id, constants.UnitSize, position)
 	return &Unit{
 		ObjectState: *objectState,
 		Word:        word,

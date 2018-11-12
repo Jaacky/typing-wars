@@ -1,6 +1,7 @@
 package typingwars
 
 import (
+	"github.com/Jaacky/typingwars/constants"
 	"github.com/Jaacky/typingwars/pb"
 	"github.com/Jaacky/typingwars/types"
 	"github.com/gofrs/uuid"
@@ -15,7 +16,7 @@ type Base struct {
 
 // NewBase initialization
 func NewBase(ownerID uuid.UUID, position *types.Point) *Base {
-	objectState := NewObjectState(ownerID, 6, position)
+	objectState := NewObjectState(ownerID, constants.BaseSize, position)
 	return &Base{
 		ObjectState: *objectState,
 		Hp:          50,
