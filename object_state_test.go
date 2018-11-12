@@ -40,10 +40,22 @@ func TestCollidesWith(t *testing.T) {
 		{
 			NewObjectState(newUUID(), 6, types.NewPoint(0, 10)),
 			NewObjectState(newUUID(), 6, types.NewPoint(0, 0)),
+			// false,
+			true,
+		},
+		{
+			NewObjectState(newUUID(), 6, types.NewPoint(10, 0)),
+			NewObjectState(newUUID(), 6, types.NewPoint(0, 0)),
 			false,
 		},
 		{
 			NewObjectState(newUUID(), 6, types.NewPoint(0, 6)),
+			NewObjectState(newUUID(), 6, types.NewPoint(0, 0)),
+			// false,
+			true,
+		},
+		{
+			NewObjectState(newUUID(), 6, types.NewPoint(6, 0)),
 			NewObjectState(newUUID(), 6, types.NewPoint(0, 0)),
 			false,
 		},
@@ -53,12 +65,28 @@ func TestCollidesWith(t *testing.T) {
 			true,
 		},
 		{
+			NewObjectState(newUUID(), 6, types.NewPoint(5, 0)),
+			NewObjectState(newUUID(), 6, types.NewPoint(0, 0)),
+			true,
+		},
+		{
 			NewObjectState(newUUID(), 6, types.NewPoint(0, 5)),
+			NewObjectState(newUUID(), 3, types.NewPoint(0, 0)),
+			// false,
+			true,
+		},
+		{
+			NewObjectState(newUUID(), 6, types.NewPoint(5, 0)),
 			NewObjectState(newUUID(), 3, types.NewPoint(0, 0)),
 			false,
 		},
 		{
 			NewObjectState(newUUID(), 6, types.NewPoint(0, 4)),
+			NewObjectState(newUUID(), 3, types.NewPoint(0, 0)),
+			true,
+		},
+		{
+			NewObjectState(newUUID(), 6, types.NewPoint(4, 0)),
 			NewObjectState(newUUID(), 3, types.NewPoint(0, 0)),
 			true,
 		},

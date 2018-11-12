@@ -34,7 +34,7 @@ func (spawner *UnitSpawner) Run() {
 					for _, player := range team.Players {
 						target := spawner.space.Bases[player.ID]
 
-						xOffset := base.Position().GetXDirectionTo(target.Position()) * 30
+						xOffset := base.Position().GetXDirectionTo(target.Position()) * 3
 						// yDrift := float32(rand.Int31n(40))
 						yDrift := (rand.Float32()*2 - 1) * 40
 

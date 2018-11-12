@@ -28,6 +28,8 @@ func (um *UnitManager) updateUnits() {
 				log.Println("Unit has arrived at target")
 				continue
 			} else if unit.CollidesWith(unit.Target) {
+				unit.Target.Hp--
+				um.destroyUnit(unit.Owner(), unit)
 				// log.Println("Collision!")
 				continue
 			} else {
