@@ -8,9 +8,9 @@ import (
 )
 
 type Space struct {
-	Bases    map[uuid.UUID]*Base
-	Units    map[uuid.UUID]*map[string]*Unit // { ClientID: { Word: Unit } ... }
-	Targeted map[uuid.UUID]*Unit
+	Bases   map[uuid.UUID]*Base
+	Units   map[uuid.UUID]*map[string]*Unit // { ClientID: { Word: Unit } ... }
+	Targets map[uuid.UUID]*Unit
 }
 
 func NewSpace(clients map[uuid.UUID]*Client) *Space {
@@ -36,15 +36,16 @@ func NewSpace(clients map[uuid.UUID]*Client) *Space {
 	}
 
 	return &Space{
-		Bases:    bases,
-		Units:    units,
-		Targeted: make(map[uuid.UUID]*Unit),
+		Bases:   bases,
+		Units:   units,
+		Targets: make(map[uuid.UUID]*Unit),
 	}
 }
 
 func (space *Space) ToProto() *pb.Space {
 	protoBases := make([]*pb.Base, 0, len(space.Bases))
 	protoUnits := make([]*pb.Unit, 0, len(space.Units))
+	protoTargets := make(map[string]*pb.Unit)
 
 	for _, base := range space.Bases {
 		protoBases = append(protoBases, base.ToProto())
@@ -56,9 +57,14 @@ func (space *Space) ToProto() *pb.Space {
 		}
 	}
 
+	for id, target := range space.Targets {
+		protoTargets[id.String()] = target.ToProto()
+	}
+
 	protoSpace := &pb.Space{
-		Bases: protoBases,
-		Units: protoUnits,
+		Bases:   protoBases,
+		Units:   protoUnits,
+		Targets: protoTargets,
 	}
 
 	return protoSpace

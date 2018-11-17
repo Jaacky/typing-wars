@@ -54,7 +54,7 @@ func (um *UnitManager) addUnit(unit *Unit) {
 }
 
 func (um *UnitManager) destroyUnit(owner uuid.UUID, unit *Unit) {
-	delete(um.space.Targeted, owner)
+	delete(um.space.Targets, owner)
 	delete(*um.space.Units[owner], unit.Word)
 }
 
@@ -80,7 +80,7 @@ func (um *UnitManager) Damage(owner uuid.UUID, key string) {
 	}
 
 	// If the owner has already acquired a target
-	if unit, ok := um.space.Targeted[owner]; ok {
+	if unit, ok := um.space.Targets[owner]; ok {
 		log.Printf("Doing damage to targeted unit: %v, key: %s", unit, key)
 		um.doDamage(unit, key)
 		return
@@ -90,7 +90,7 @@ func (um *UnitManager) Damage(owner uuid.UUID, key string) {
 	for word, unit := range units {
 		if string(word[0]) == key {
 			log.Printf("Acquired new target to dmg: %v, key: %s", unit, key)
-			um.space.Targeted[owner] = unit
+			um.space.Targets[owner] = unit
 			um.doDamage(unit, key)
 			return
 		}
