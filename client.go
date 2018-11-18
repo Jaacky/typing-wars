@@ -82,18 +82,18 @@ func (client *Client) SetRoom(room *Room) error {
 }
 
 func (client *Client) Listen() {
-	go client.listenRead()
-	client.listenWrite()
-
-}
-
-func (client *Client) listenRead() {
 	defer func() {
-		// TODO: Check and remove client from room
+		// Server will handle clean up of client leaving
 		client.Server.removeClient(client)
 		client.Conn.Close()
 	}()
 
+	go client.listenRead()
+	go client.listenWrite()
+	<-client.done
+}
+
+func (client *Client) listenRead() {
 	client.Conn.SetReadLimit(maxMessageSize)
 	client.Conn.SetReadDeadline(time.Now().Add(pongWait))
 	client.Conn.SetPongHandler(func(string) error { client.Conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
@@ -138,7 +138,6 @@ func (client *Client) unmarshalUserMessage(data []byte) {
 			return
 		}
 		userInput := userMessage.GetUserAction().GetUserInput()
-		// log.Printf("User input: %v", userInput)
 		room.game.EventDispatcher.FireUserAction(&UserAction{Owner: client.ID, Key: userInput.GetKey()})
 	case *pb.UserMessage_CreateRoomRequest:
 		log.Println("UserMessage - CreateRoomRequest")
@@ -153,6 +152,7 @@ func (client *Client) unmarshalUserMessage(data []byte) {
 		if err != nil {
 			// TODO: Return error to client
 			log.Println("Join Room Request - Unable to parse ID from string")
+			client.done <- true
 			return
 		}
 		client.Server.joinRoomCh <- &joinRoomRequest{
@@ -181,10 +181,7 @@ func (client *Client) tryToRegisterPlayer(registerPlayerMsg *pb.RegisterPlayer) 
 func (client *Client) listenWrite() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
-		// TODO: Check and remove client from room
 		ticker.Stop()
-		client.Server.removeClient(client)
-		client.Conn.Close()
 	}()
 
 	for {

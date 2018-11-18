@@ -72,6 +72,18 @@ func (room *Room) addClient(client *Client, username string) {
 	room.update()
 }
 
+func (room *Room) removeClient(id uuid.UUID) bool {
+	room.totalPlayers -= 1
+	delete(room.clients, id)
+	delete(room.players, id)
+	delete(room.playerStatuses, id)
+	roomEmpty := room.totalPlayers == 0
+	if !roomEmpty {
+		room.update()
+	}
+	return roomEmpty
+}
+
 func (room *Room) updatePlayerReady(clientID uuid.UUID, readyStatus bool) {
 	log.Printf("Updating player ready status for client %s", clientID)
 	if _, ok := room.playerStatuses[clientID]; ok {
@@ -138,7 +150,6 @@ func (room *Room) update() {
 }
 
 func (room *Room) HandlePhysicsReady(physicsReady *PhysicsReady) {
-	log.Println("Sending updated state to all clients")
 	room.SendToAllClients(room.game.Space.ToMessage())
 }
 

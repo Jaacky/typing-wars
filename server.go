@@ -53,6 +53,13 @@ func (server *Server) addClient(client *Client) {
 
 func (server *Server) removeClient(client *Client) {
 	delete(server.clients, client.ID)
+	room := client.Room
+	if room != nil {
+		roomEmpty := room.removeClient(client.ID)
+		if roomEmpty {
+			delete(server.rooms, room.ID)
+		}
+	}
 }
 
 func (server *Server) Listen() {
@@ -101,12 +108,14 @@ func (server *Server) manageRooms() {
 				if err != nil {
 					// TODO: Return room error to client
 					log.Println(err)
+					client.done <- true
 				} else {
 					room.addClient(client, request.username)
 				}
 			} else {
 				// TODO: Room does not exist, return room error to client
 				log.Println("Room does not exist")
+				client.done <- true
 			}
 
 		}
