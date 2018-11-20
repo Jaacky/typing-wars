@@ -15,9 +15,9 @@ message UserAction {
 
 }
 
-message RegisterPlayer {
-    string username = 1;
-}
+// message RegisterPlayer {
+//     string username = 1;
+// }
 
 message CreateRoomRequest {
     string username = 1;
@@ -90,11 +90,15 @@ message Space {
     map<string, Unit> targets = 3;
 }
 
+message GameOver {
+    Player defeated = 1;
+}
+
 message UserMessage {
     oneof content {
         Space space = 1;
         UserAction userAction = 2;
-        RegisterPlayer registerPlayer = 3;
+        // RegisterPlayer registerPlayer = 3;
         CreateRoomRequest createRoomRequest = 4;
         JoinRoomRequest joinRoomRequest = 5;
         JoinRoomAck joinRoomAck = 6;
@@ -102,5 +106,6 @@ message UserMessage {
         UpdatePlayerReady updatePlayerReady = 8;
         StartGameRequest startGameRequest = 9;
         StartGameAck startGameAck = 10;
+        GameOver gameOver = 11;
     }
 }

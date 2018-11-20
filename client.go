@@ -131,7 +131,7 @@ func (client *Client) unmarshalUserMessage(data []byte) {
 
 	switch userMessageType := userMessage.Content.(type) {
 	case *pb.UserMessage_UserAction:
-		log.Println("UserMessage - UserAction")
+		// log.Println("UserMessage - UserAction")
 		room := client.Room
 		if !room.InGame {
 			log.Println("Warning - UserMessage - UserAction received but not in game")
@@ -158,25 +158,25 @@ func (client *Client) unmarshalUserMessage(data []byte) {
 		client.Server.joinRoomCh <- &joinRoomRequest{
 			roomID:   roomID,
 			clientID: client.ID,
-			username: request.GetUsername(),
+			username: strings.TrimSpace(request.GetUsername()),
 		}
 	case *pb.UserMessage_UpdatePlayerReady:
 		log.Println("UserMessage - ReadyPlayer")
 		client.Room.updatePlayerReady(client.ID, userMessage.GetUpdatePlayerReady().GetReadyStatus())
 	case *pb.UserMessage_StartGameRequest:
 		client.Room.start()
-	case *pb.UserMessage_RegisterPlayer:
-		log.Println("UserMessage - RegisterPlayer")
-		client.tryToRegisterPlayer(userMessage.GetRegisterPlayer())
+	// case *pb.UserMessage_RegisterPlayer:
+	// 	log.Println("UserMessage - RegisterPlayer")
+	// 	client.tryToRegisterPlayer(userMessage.GetRegisterPlayer())
 	default:
 		log.Printf("Unknown message type %T\n", userMessageType)
 	}
 }
 
-func (client *Client) tryToRegisterPlayer(registerPlayerMsg *pb.RegisterPlayer) {
-	username := strings.TrimSpace(registerPlayerMsg.GetUsername())
-	log.Printf("Registering player: %s\n", username)
-}
+// func (client *Client) tryToRegisterPlayer(registerPlayerMsg *pb.RegisterPlayer) {
+// 	username := strings.TrimSpace(registerPlayerMsg.GetUsername())
+// 	log.Printf("Registering player: %s\n", username)
+// }
 
 func (client *Client) listenWrite() {
 	ticker := time.NewTicker(pingPeriod)

@@ -8,12 +8,14 @@ import (
 )
 
 type UnitManager struct {
-	space *Space
+	space           *Space
+	eventDispatcher *EventDispatcher
 }
 
-func NewUnitManager(space *Space) *UnitManager {
+func NewUnitManager(space *Space, eventDispatcher *EventDispatcher) *UnitManager {
 	return &UnitManager{
-		space: space,
+		space:           space,
+		eventDispatcher: eventDispatcher,
 	}
 }
 
@@ -28,8 +30,12 @@ func (um *UnitManager) updateUnits() {
 				log.Println("Unit has arrived at target")
 				continue
 			} else if unit.CollidesWith(unit.Target) {
-				unit.Target.Hp--
-				um.destroyUnit(unit.Owner(), unit)
+				// unit.Target.Hp--
+				unitCollision := &UnitCollision{
+					Unit: unit,
+				}
+				um.eventDispatcher.FireUnitCollision(unitCollision)
+				// um.destroyUnit(unit.Owner(), unit)
 				// log.Println("Collision!")
 				continue
 			} else {
@@ -53,6 +59,10 @@ func (um *UnitManager) addUnit(unit *Unit) {
 	}
 }
 
+func (um *UnitManager) DestroyUnit(unit *Unit) {
+	um.destroyUnit(unit.Owner(), unit)
+}
+
 func (um *UnitManager) destroyUnit(owner uuid.UUID, unit *Unit) {
 	delete(um.space.Targets, owner)
 	delete(*um.space.Units[owner], unit.Word)
@@ -60,28 +70,28 @@ func (um *UnitManager) destroyUnit(owner uuid.UUID, unit *Unit) {
 
 func (um *UnitManager) doDamage(unit *Unit, key string) {
 	if string(unit.Word[unit.Typed]) != key {
-		log.Printf("No damage done bc unit: %v has no key: %s", unit, key)
+		// log.Printf("No damage done bc unit: %v has no key: %s", unit, key)
 		return
 	}
 	unit.Typed++
 	if len(unit.Word) == int(unit.Typed) {
-		log.Printf("Destrying unit: %v", unit)
+		// log.Printf("Destrying unit: %v", unit)
 		um.destroyUnit(unit.Owner(), unit)
 	}
 }
 
 func (um *UnitManager) Damage(owner uuid.UUID, key string) {
 	units := *um.space.Units[owner]
-	log.Printf("User input key: %s", key)
+	// log.Printf("User input key: %s", key)
 	// If the owner has no units
 	if len(units) == 0 {
-		log.Println("User has no units")
+		// log.Println("User has no units")
 		return
 	}
 
 	// If the owner has already acquired a target
 	if unit, ok := um.space.Targets[owner]; ok {
-		log.Printf("Doing damage to targeted unit: %v, key: %s", unit, key)
+		// log.Printf("Doing damage to targeted unit: %v, key: %s", unit, key)
 		um.doDamage(unit, key)
 		return
 	}
@@ -89,12 +99,12 @@ func (um *UnitManager) Damage(owner uuid.UUID, key string) {
 	// Acquire a target
 	for word, unit := range units {
 		if string(word[0]) == key {
-			log.Printf("Acquired new target to dmg: %v, key: %s", unit, key)
+			// log.Printf("Acquired new target to dmg: %v, key: %s", unit, key)
 			um.space.Targets[owner] = unit
 			um.doDamage(unit, key)
 			return
 		}
 	}
 
-	log.Printf("No damage done bc no unit w/ key: %s", key)
+	// log.Printf("No damage done bc no unit w/ key: %s", key)
 }

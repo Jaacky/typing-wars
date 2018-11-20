@@ -1,8 +1,6 @@
 package typingwars
 
 import (
-	"fmt"
-	"log"
 	"time"
 )
 
@@ -25,11 +23,11 @@ type timeTickHandler struct {
 }
 
 func (handler *timeTickHandler) handle() {
-	log.Println("Time ticker handler handling")
+	// log.Println("Time ticker handler handling")
 	for _, listener := range handler.eventListeners {
 		listener.HandleTimeTick(handler.event)
 	}
-	log.Println("Time ticker handler handling finished")
+	// log.Println("Time ticker handler handling finished")
 }
 
 type PhysicsReadyListener interface {
@@ -42,11 +40,11 @@ type physicsReadyHandler struct {
 }
 
 func (handler *physicsReadyHandler) handle() {
-	log.Println("PhysicsReadyHandler handling", handler.eventListeners)
+	// log.Println("PhysicsReadyHandler handling", handler.eventListeners)
 	for _, listener := range handler.eventListeners {
 		listener.HandlePhysicsReady(handler.event)
 	}
-	log.Println("Physicsreadyhandler finished handling")
+	// log.Println("Physicsreadyhandler finished handling")
 }
 
 type UnitSpawnedListener interface {
@@ -59,11 +57,26 @@ type unitSpawnedHandler struct {
 }
 
 func (handler *unitSpawnedHandler) handle() {
-	log.Println("Unit spawner handler handling")
+	// log.Println("Unit spawner handler handling")
 	for _, listener := range handler.eventListeners {
 		listener.HandleUnitSpawned(handler.event)
 	}
-	log.Println("Unit spawner handler finished handling")
+	// log.Println("Unit spawner handler finished handling")
+}
+
+type UnitCollisionListener interface {
+	HandleUnitCollision(*UnitCollision)
+}
+
+type unitCollisionHandler struct {
+	event          *UnitCollision
+	eventListeners []UnitCollisionListener
+}
+
+func (handler *unitCollisionHandler) handle() {
+	for _, listener := range handler.eventListeners {
+		listener.HandleUnitCollision(handler.event)
+	}
 }
 
 type UserActionListener interface {
@@ -81,27 +94,46 @@ func (handler *userActionHandler) handle() {
 	}
 }
 
+type GameOverListener interface {
+	HandleGameOver(*GameOver)
+}
+
+type gameOverHandler struct {
+	event          *GameOver
+	eventListeners []GameOverListener
+}
+
+func (handler *gameOverHandler) handle() {
+	for _, listener := range handler.eventListeners {
+		listener.HandleGameOver(handler.event)
+	}
+}
+
 // EventDispatcher comment
 type EventDispatcher struct {
 	running bool
 
 	eventQueue chan eventHandler
 
-	timeTickListeners     []TimeTickListener
-	unitSpawnedListeners  []UnitSpawnedListener
-	physicsReadyListeners []PhysicsReadyListener
-	userActionListeners   []UserActionListener
+	timeTickListeners      []TimeTickListener
+	unitSpawnedListeners   []UnitSpawnedListener
+	unitCollisionListeners []UnitCollisionListener
+	physicsReadyListeners  []PhysicsReadyListener
+	userActionListeners    []UserActionListener
+	gameOverListeners      []GameOverListener
 }
 
 // NewEventDispatcher comment
 func NewEventDispatcher() *EventDispatcher {
 	return &EventDispatcher{
-		running:               false,
-		eventQueue:            make(chan eventHandler, eventQueuesCapacity),
-		timeTickListeners:     []TimeTickListener{},
-		unitSpawnedListeners:  []UnitSpawnedListener{},
-		physicsReadyListeners: []PhysicsReadyListener{},
-		userActionListeners:   []UserActionListener{},
+		running:                false,
+		eventQueue:             make(chan eventHandler, eventQueuesCapacity),
+		timeTickListeners:      []TimeTickListener{},
+		unitSpawnedListeners:   []UnitSpawnedListener{},
+		unitCollisionListeners: []UnitCollisionListener{},
+		physicsReadyListeners:  []PhysicsReadyListener{},
+		userActionListeners:    []UserActionListener{},
+		gameOverListeners:      []GameOverListener{},
 	}
 }
 
@@ -111,9 +143,9 @@ func (dispatcher *EventDispatcher) RunEventLoop() {
 	for {
 		select {
 		case handler := <-dispatcher.eventQueue:
-			fmt.Printf("Event queue popped: %v\n", handler)
+			// fmt.Printf("Event queue popped: %v\n", handler)
 			handler.handle()
-			log.Println("Finishing handling")
+			// log.Println("Finishing handling")
 		default:
 			// log.Println("Sleeping idle dispatcher")
 			time.Sleep(idleDispatcherTime)
@@ -133,7 +165,7 @@ func (dispatcher *EventDispatcher) FireTimeTick(timeTick *TimeTick) {
 	}
 
 	dispatcher.eventQueue <- handler
-	log.Println("Time tick fired")
+	// log.Println("Time tick fired")
 }
 
 func (dispatcher *EventDispatcher) RegisterUnitSpawnedListener(listener UnitSpawnedListener) {
@@ -145,9 +177,22 @@ func (dispatcher *EventDispatcher) FireUnitSpawned(event *UnitSpawned) {
 		event:          event,
 		eventListeners: dispatcher.unitSpawnedListeners,
 	}
-	log.Println("About to add unit spawned handler to event queue")
+	// log.Println("About to add unit spawned handler to event queue")
 	dispatcher.eventQueue <- handler
-	log.Println("Unit spawned fired")
+	// log.Println("Unit spawned fired")
+}
+
+func (dispatcher *EventDispatcher) RegisterUnitCollisionListener(listener UnitCollisionListener) {
+	dispatcher.unitCollisionListeners = append(dispatcher.unitCollisionListeners, listener)
+}
+
+func (dispatcher *EventDispatcher) FireUnitCollision(unitCollision *UnitCollision) {
+	handler := &unitCollisionHandler{
+		event:          unitCollision,
+		eventListeners: dispatcher.unitCollisionListeners,
+	}
+
+	dispatcher.eventQueue <- handler
 }
 
 func (dispatcher *EventDispatcher) RegisterPhysicsReadyListener(listener PhysicsReadyListener) {
@@ -161,7 +206,7 @@ func (dispatcher *EventDispatcher) FirePhysicsReady(physicsReady *PhysicsReady) 
 	}
 
 	dispatcher.eventQueue <- handler
-	log.Println("Physics ready fired")
+	// log.Println("Physics ready fired")
 }
 
 func (dispatcher *EventDispatcher) RegisterUserActionListener(listener UserActionListener) {
@@ -169,9 +214,23 @@ func (dispatcher *EventDispatcher) RegisterUserActionListener(listener UserActio
 }
 
 func (dispatcher *EventDispatcher) FireUserAction(userAction *UserAction) {
+	// log.Println("Firing user action")
 	handler := &userActionHandler{
 		event:          userAction,
 		eventListeners: dispatcher.userActionListeners,
+	}
+
+	dispatcher.eventQueue <- handler
+}
+
+func (dispatcher *EventDispatcher) RegisterGameOverListener(listener GameOverListener) {
+	dispatcher.gameOverListeners = append(dispatcher.gameOverListeners, listener)
+}
+
+func (dispatcher *EventDispatcher) FireGameOver(gameOver *GameOver) {
+	handler := &gameOverHandler{
+		event:          gameOver,
+		eventListeners: dispatcher.gameOverListeners,
 	}
 
 	dispatcher.eventQueue <- handler

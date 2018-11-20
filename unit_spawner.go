@@ -40,7 +40,7 @@ func (spawner *UnitSpawner) Run() {
 
 						driftOffset := types.NewVector(xOffset, yDrift)
 						startPosition := base.Position().Add(driftOffset)
-						unit := NewUnit(base.Owner(), word, startPosition, 0.5, target)
+						unit := NewUnit(base.Owner(), word, startPosition, constants.UnitSpeed, target)
 						event := &UnitSpawned{
 							Unit: unit,
 						}

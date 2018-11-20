@@ -19,7 +19,7 @@ func NewBase(ownerID uuid.UUID, position *types.Point) *Base {
 	objectState := NewObjectState(ownerID, constants.BaseSize, position)
 	return &Base{
 		ObjectState: *objectState,
-		Hp:          50,
+		Hp:          constants.BaseHp,
 		Colour:      "#fff",
 	}
 }
