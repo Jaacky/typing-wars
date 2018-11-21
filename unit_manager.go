@@ -50,23 +50,44 @@ func (um *UnitManager) updateUnits() {
 
 func (um *UnitManager) addUnit(unit *Unit) {
 	userUnits := *um.space.Units[unit.Owner()]
-	if _, ok := userUnits[unit.Word]; !ok {
+	incomingUnits := *um.space.IncomingUnits[unit.Target.Owner()]
+
+	_, duplicateUserUnits := userUnits[unit.Word]
+	_, duplicateIncomingUnits := incomingUnits[unit.Word]
+
+	if !duplicateUserUnits && !duplicateIncomingUnits {
 		userUnits[unit.Word] = unit
-		// log.Printf("Adding unit <%s> for client %s", unit.Word, unit.Owner)
-		// log.Printf("All units now: %v", um.space.Units)
+		incomingUnits[unit.Word] = unit
 	} else {
-		log.Printf("Unit with word already exists")
+		log.Printf("Unit with word already exists, [duplicateUserUnits, duplicateIncomingUnits]: [%t, %t]", duplicateUserUnits, duplicateIncomingUnits)
 	}
+	// if _, ok := userUnits[unit.Word]; !ok {
+	// 	userUnits[unit.Word] = unit
+	// 	// log.Printf("Adding unit <%s> for client %s", unit.Word, unit.Owner)
+	// 	// log.Printf("All units now: %v", um.space.Units)
+	// } else {
+	// 	log.Printf("Unit with word already exists")
+	// }
+
+	// if _, ok := incomingUnits[unit.Word]; !ok {
+	// 	incomingUnits[unit.Word] = unit
+	// } else {
+	// 	log.Printf("Incoming unit with word already exists")
+	// }
 }
 
 func (um *UnitManager) DestroyUnit(unit *Unit) {
-	um.destroyUnit(unit.Owner(), unit)
+	// um.destroyUnit(unit)
+	delete(um.space.Targets, unit.Target.Owner())
+	delete(*um.space.IncomingUnits[unit.Target.Owner()], unit.Word)
+	delete(*um.space.Units[unit.Owner()], unit.Word)
 }
 
-func (um *UnitManager) destroyUnit(owner uuid.UUID, unit *Unit) {
-	delete(um.space.Targets, owner)
-	delete(*um.space.Units[owner], unit.Word)
-}
+// func (um *UnitManager) destroyUnit(unit *Unit) {
+// 	delete(um.space.Targets, unit.Owner())
+// 	delete(*um.space.IncomingUnits[unit.Target.Owner()], unit.Word)
+// 	delete(*um.space.Units[unit.Owner()], unit.Word)
+// }
 
 func (um *UnitManager) doDamage(unit *Unit, key string) {
 	if string(unit.Word[unit.Typed]) != key {
@@ -75,13 +96,13 @@ func (um *UnitManager) doDamage(unit *Unit, key string) {
 	}
 	unit.Typed++
 	if len(unit.Word) == int(unit.Typed) {
-		// log.Printf("Destrying unit: %v", unit)
-		um.destroyUnit(unit.Owner(), unit)
+		log.Printf("Destrying unit: %v", unit)
+		um.DestroyUnit(unit)
 	}
 }
 
 func (um *UnitManager) Damage(owner uuid.UUID, key string) {
-	units := *um.space.Units[owner]
+	units := *um.space.IncomingUnits[owner]
 	// log.Printf("User input key: %s", key)
 	// If the owner has no units
 	if len(units) == 0 {

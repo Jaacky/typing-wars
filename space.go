@@ -8,14 +8,16 @@ import (
 )
 
 type Space struct {
-	Bases   map[uuid.UUID]*Base
-	Units   map[uuid.UUID]*map[string]*Unit // { ClientID: { Word: Unit } ... }
-	Targets map[uuid.UUID]*Unit
+	Bases         map[uuid.UUID]*Base
+	Units         map[uuid.UUID]*map[string]*Unit // { ClientID: { Word: Unit } ... }
+	IncomingUnits map[uuid.UUID]*map[string]*Unit
+	Targets       map[uuid.UUID]*Unit
 }
 
 func NewSpace(clients map[uuid.UUID]*Client) *Space {
 	bases := make(map[uuid.UUID]*Base)
 	units := make(map[uuid.UUID]*map[string]*Unit)
+	incomingUnits := make(map[uuid.UUID]*map[string]*Unit)
 
 	i := 0
 	for _, client := range clients {
@@ -30,15 +32,19 @@ func NewSpace(clients map[uuid.UUID]*Client) *Space {
 		base := NewBase(client.ID, position)
 		bases[client.ID] = base
 
-		pUnits := make(map[string]*Unit)
-		units[client.ID] = &pUnits
+		playerUnits := make(map[string]*Unit)
+		units[client.ID] = &playerUnits
+
+		playerIncomingUnits := make(map[string]*Unit)
+		incomingUnits[client.ID] = &playerIncomingUnits
 		i++
 	}
 
 	return &Space{
-		Bases:   bases,
-		Units:   units,
-		Targets: make(map[uuid.UUID]*Unit),
+		Bases:         bases,
+		Units:         units,
+		IncomingUnits: incomingUnits,
+		Targets:       make(map[uuid.UUID]*Unit),
 	}
 }
 

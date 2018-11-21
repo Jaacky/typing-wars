@@ -162,7 +162,7 @@ func (room *Room) HandleGameOver(gameOver *GameOver) {
 			GameOver: pbGameOver,
 		},
 	}
-	log.Printf("Sending game over messages, defeated is: %s", gameOver.Defeated.String())
+	log.Printf("Sending game over messages, defeated is: player (%s) %s", room.players[gameOver.Defeated].Username, gameOver.Defeated.String())
 	room.SendToAllClients(gameOverMessage)
 }
 
