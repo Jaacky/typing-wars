@@ -30,11 +30,15 @@ func (ticker *PhysicsTicker) Run() {
 			log.Println("physics ticker stop")
 			return
 		default:
-			event := &TimeTick{
-				FrameID: i,
-			}
-			ticker.eventDispatcher.FireTimeTick(event)
+			ticker.Tick(i)
 			i++
 		}
 	}
+}
+
+func (ticker *PhysicsTicker) Tick(frameId uint32) {
+	event := &TimeTick{
+		FrameID: frameId,
+	}
+	ticker.eventDispatcher.FireTimeTick(event)
 }
