@@ -94,6 +94,10 @@ message GameOver {
     Player defeated = 1;
 }
 
+message EndGame {
+    string message = 1;
+}
+
 message UserMessage {
     oneof content {
         Space space = 1;
@@ -107,5 +111,6 @@ message UserMessage {
         StartGameRequest startGameRequest = 9;
         StartGameAck startGameAck = 10;
         GameOver gameOver = 11;
+        EndGame endGame = 12;
     }
 }

@@ -15,6 +15,10 @@ type Game struct {
 	EventDispatcher *EventDispatcher
 	physicsTicker   *PhysicsTicker
 	unitSpawner     *UnitSpawner
+
+	eventDispatcherStop chan bool
+	physicsTickerStop   chan bool
+	unitSpawnerStop     chan bool
 }
 
 // NewGame struct
@@ -24,9 +28,13 @@ func NewGame(room *Room) *Game {
 	teams := makeTeams(clients, 2)
 	space := NewSpace(clients)
 
-	eventDispatcher := NewEventDispatcher()
-	physicsTicker := NewPhysicsTicker(eventDispatcher)
-	unitSpawner := NewUnitSpawner(eventDispatcher, space, teams)
+	eventDispatcherStop := make(chan bool)
+	physicsTickerStop := make(chan bool)
+	unitSpawnerStop := make(chan bool)
+
+	eventDispatcher := NewEventDispatcher(eventDispatcherStop)
+	physicsTicker := NewPhysicsTicker(physicsTickerStop, eventDispatcher)
+	unitSpawner := NewUnitSpawner(unitSpawnerStop, eventDispatcher, space, teams)
 
 	updater := NewUpdater(space, eventDispatcher)
 	eventDispatcher.RegisterTimeTickListener(updater)
@@ -37,12 +45,15 @@ func NewGame(room *Room) *Game {
 	eventDispatcher.RegisterGameOverListener(room)
 
 	return &Game{
-		Space:           space,
-		Teams:           teams,
-		Clients:         clients,
-		EventDispatcher: eventDispatcher,
-		physicsTicker:   physicsTicker,
-		unitSpawner:     unitSpawner,
+		Space:               space,
+		Teams:               teams,
+		Clients:             clients,
+		EventDispatcher:     eventDispatcher,
+		physicsTicker:       physicsTicker,
+		unitSpawner:         unitSpawner,
+		eventDispatcherStop: eventDispatcherStop,
+		physicsTickerStop:   physicsTickerStop,
+		unitSpawnerStop:     unitSpawnerStop,
 	}
 }
 
@@ -69,4 +80,10 @@ func (g *Game) start() {
 	go g.EventDispatcher.RunEventLoop()
 	go g.physicsTicker.Run()
 	go g.unitSpawner.Run()
+}
+
+func (g *Game) stop() {
+	g.eventDispatcherStop <- true
+	g.physicsTickerStop <- true
+	g.unitSpawnerStop <- true
 }

@@ -7,7 +7,7 @@ import (
 const (
 	PhysicsFrameDuration   = 200 * time.Millisecond
 	UnitSpawningInterval   = 3 * time.Second
-	BaseHp                 = 1
+	BaseHp                 = 50
 	UnitSpeed              = 2
 	BaseSize               = 6
 	UnitSize               = 2
