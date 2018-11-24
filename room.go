@@ -81,14 +81,11 @@ func (room *Room) removeClient(id uuid.UUID) bool {
 
 	// Handling if in game after deleting client because need to send msg to clients left in room
 	if room.InGame {
-		// gameOver := &GameOver{
-		// 	Defeated: id,
-		// }
-		// room.HandleGameOver(gameOver)
 		room.endGame("message" + player.Username)
 	}
 
 	roomEmpty := room.totalPlayers == 0
+	log.Printf("room empty? %t", roomEmpty)
 	if !roomEmpty {
 		// TODO: unready players left
 		room.update()
@@ -121,6 +118,22 @@ func (room *Room) start() {
 	room.InGame = true
 }
 
+func (room *Room) endGame(msg string) {
+	room.game.stop()
+	room.InGame = false
+	pbEndGame := &pb.EndGame{
+		Message: msg,
+	}
+
+	endGameMessage := &pb.UserMessage{
+		Content: &pb.UserMessage_EndGame{
+			EndGame: pbEndGame,
+		},
+	}
+
+	room.SendToAllClients(endGameMessage)
+}
+
 func (room *Room) update() {
 	pbPlayers := make(map[string]*pb.Player)
 	pbPlayerStatuses := make(map[string]*pb.PlayerStatus)
@@ -134,8 +147,8 @@ func (room *Room) update() {
 			Ready: playerStatus.ready,
 			Index: playerStatus.index,
 		}
-		log.Printf("client: %s - playerstatus: %v", idString, playerStatus)
-		log.Printf("Player: %s - pbPlayerStatus.Ready: %t, pbPlayerStatus.Index: %d, pbplayerstatus: %v", idString, pbPlayerStatus.Ready, pbPlayerStatus.Index, pbPlayerStatus)
+		// log.Printf("client: %s - playerstatus: %v", idString, playerStatus)
+		// log.Printf("Player: %s - pbPlayerStatus.Ready: %t, pbPlayerStatus.Index: %d, pbplayerstatus: %v", idString, pbPlayerStatus.Ready, pbPlayerStatus.Index, pbPlayerStatus)
 		pbPlayers[idString] = player.ToProto()
 		pbPlayerStatuses[idString] = pbPlayerStatus
 	}
@@ -161,37 +174,11 @@ func (room *Room) HandlePhysicsReady(physicsReady *PhysicsReady) {
 	room.SendToAllClients(room.game.Space.ToMessage())
 }
 
-func (room *Room) endGame(msg string) {
-	room.game.stop()
-	room.InGame = false
-	pbEndGame := &pb.EndGame{
-		Message: msg,
-	}
-
-	endGameMessage := &pb.UserMessage{
-		Content: &pb.UserMessage_EndGame{
-			EndGame: pbEndGame,
-		},
-	}
-
-	room.SendToAllClients(endGameMessage)
-}
-
 func (room *Room) HandleGameOver(gameOver *GameOver) {
+	// log.Printf("Sending game over messages, defeated is: player (%s) %s", room.players[gameOver.Defeated].Username, gameOver.Defeated.String())
 
-	pbGameOver := &pb.GameOver{
-		Defeated: room.players[gameOver.Defeated].ToProto(),
-	}
-
-	gameOverMessage := &pb.UserMessage{
-		Content: &pb.UserMessage_GameOver{
-			GameOver: pbGameOver,
-		},
-	}
-	log.Printf("Sending game over messages, defeated is: player (%s) %s", room.players[gameOver.Defeated].Username, gameOver.Defeated.String())
-	room.SendToAllClients(gameOverMessage)
-
-	room.endGame("message from handle game over")
+	message := "Lost: " + gameOver.Defeated.String()
+	room.endGame(message)
 }
 
 func (room *Room) SendToClient(clientID uuid.UUID, message proto.Message) {
