@@ -1,0 +1,3 @@
+./compileProtobuf.sh
+go build *.go
+go build ./cmd/typingwars/main.go && ./main
