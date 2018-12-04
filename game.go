@@ -1,77 +1,89 @@
-package main
+package typingwars
 
 import (
-	"github.com/Jaacky/typing-wars/events"
-	"github.com/Jaacky/typing-wars/game"
+	"log"
+
+	"github.com/gofrs/uuid"
 )
-
-type baseBuilding struct {
-	Owner    string
-	Hp       int
-	Colour   string
-	Position [2]int
-}
-
-type unit struct {
-	Owner   string
-	Word    string
-	Typed   string
-	Remains string
-}
 
 // Game strcut
 type Game struct {
-	Clients         []*Client
-	Bases           map[string]*baseBuilding
-	Units           map[string]*map[string]*unit // { ClientID: { Word: Unit } ... }
+	Clients         map[uuid.UUID]*Client
+	Teams           []*Team
+	Space           *Space
 	InGame          bool
-	EventDispatcher *events.EventDispatcher
-	physicsTicker   *game.PhysicsTicker
-	unitSpawner     *game.UnitSpawner
+	EventDispatcher *EventDispatcher
+	physicsTicker   *PhysicsTicker
+	unitSpawner     *UnitSpawner
+
+	eventDispatcherStop chan bool
+	physicsTickerStop   chan bool
+	unitSpawnerStop     chan bool
 }
 
 // NewGame struct
-func NewGame(clients []*Client) *Game {
+func NewGame(room *Room) *Game {
 	// bases := []*baseBuilding{}
-	bases := make(map[string]*baseBuilding)
-	units := make(map[string]*map[string]*unit)
+	clients := room.clients
+	teams := makeTeams(clients, 2)
+	space := NewSpace(clients)
 
-	for i := 0; i < len(clients); i++ {
-		client := clients[i]
-		var position [2]int
+	eventDispatcherStop := make(chan bool)
+	physicsTickerStop := make(chan bool)
+	unitSpawnerStop := make(chan bool)
 
-		if i == 0 {
-			position = [2]int{5, 50}
-		} else {
-			position = [2]int{95, 50}
-		}
+	eventDispatcher := NewEventDispatcher(eventDispatcherStop)
+	physicsTicker := NewPhysicsTicker(physicsTickerStop, eventDispatcher)
+	unitSpawner := NewUnitSpawner(unitSpawnerStop, eventDispatcher, space, teams)
 
-		base := &baseBuilding{Owner: client.ID, Hp: 50, Colour: "#000", Position: position}
-		bases[client.ID] = base
-
-		pUnits := make(map[string]*unit)
-		units[client.ID] = &pUnits
-	}
-
-	eventDispatcher := events.NewEventDispatcher()
-	physicsTicker := game.NewPhysicsTicker(eventDispatcher)
-	unitSpawner := game.NewUnitSpawner(eventDispatcher)
-
-	updater := game.NewUpdater()
+	updater := NewUpdater(space, eventDispatcher)
 	eventDispatcher.RegisterTimeTickListener(updater)
+	eventDispatcher.RegisterUnitSpawnedListener(updater)
+	eventDispatcher.RegisterUnitCollisionListener(updater)
+	eventDispatcher.RegisterUserActionListener(updater)
+	eventDispatcher.RegisterPhysicsReadyListener(room)
+	eventDispatcher.RegisterGameOverListener(room)
 
 	return &Game{
-		Bases:           bases,
-		Units:           units,
-		Clients:         clients,
-		EventDispatcher: eventDispatcher,
-		physicsTicker:   physicsTicker,
-		unitSpawner:     unitSpawner,
+		Space:               space,
+		Teams:               teams,
+		Clients:             clients,
+		EventDispatcher:     eventDispatcher,
+		physicsTicker:       physicsTicker,
+		unitSpawner:         unitSpawner,
+		eventDispatcherStop: eventDispatcherStop,
+		physicsTickerStop:   physicsTickerStop,
+		unitSpawnerStop:     unitSpawnerStop,
 	}
+}
+
+func makeTeams(clients map[uuid.UUID]*Client, numTeams int) []*Team {
+	teams := []*Team{}
+
+	for i := 0; i < numTeams; i++ {
+		teams = append(teams, NewTeam())
+		log.Printf("Team %d made!", i)
+	}
+
+	j := 0
+	for _, client := range clients {
+		teamNum := j % numTeams
+		log.Printf("Client to team %d!", teamNum)
+		teams[teamNum].AddPlayer(client)
+		j++
+	}
+
+	return teams
 }
 
 func (g *Game) start() {
 	go g.EventDispatcher.RunEventLoop()
 	go g.physicsTicker.Run()
 	go g.unitSpawner.Run()
+}
+
+func (g *Game) stop() {
+	g.eventDispatcherStop <- true
+	g.physicsTickerStop <- true
+	g.unitSpawnerStop <- true
 }
