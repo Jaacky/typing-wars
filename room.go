@@ -81,7 +81,8 @@ func (room *Room) removeClient(id uuid.UUID) bool {
 
 	// Handling if in game after deleting client because need to send msg to clients left in room
 	if room.InGame {
-		room.endGame("message" + player.Username)
+		message := fmt.Sprintf("%s has left the game", player.Username)
+		room.endGame(id, message)
 	}
 
 	roomEmpty := room.totalPlayers == 0
@@ -118,7 +119,7 @@ func (room *Room) start() {
 	room.InGame = true
 }
 
-func (room *Room) endGame(msg string) {
+func (room *Room) endGame(defeated uuid.UUID, msg string) {
 	room.game.stop()
 	room.InGame = false
 	pbEndGame := &pb.EndGame{
@@ -131,7 +132,20 @@ func (room *Room) endGame(msg string) {
 		},
 	}
 
-	room.SendToAllClients(endGameMessage)
+	pbDefeatedEndGame := &pb.EndGame{
+		Message: "You have been defeated",
+	}
+
+	defeatedEndGameMessage := &pb.UserMessage{
+		Content: &pb.UserMessage_EndGame{
+			EndGame: pbDefeatedEndGame,
+		},
+	}
+
+	fmt.Printf("Sending end game message to everyone but defeated: %s\n", msg)
+	log.Printf("Sending defeated game message: %s", defeatedEndGameMessage)
+	room.SendToAllClientsButClient(defeated, endGameMessage)
+	room.SendToClient(defeated, defeatedEndGameMessage)
 }
 
 func (room *Room) update() {
@@ -176,9 +190,11 @@ func (room *Room) HandlePhysicsReady(physicsReady *PhysicsReady) {
 
 func (room *Room) HandleGameOver(gameOver *GameOver) {
 	// log.Printf("Sending game over messages, defeated is: player (%s) %s", room.players[gameOver.Defeated].Username, gameOver.Defeated.String())
+	defeated := room.players[gameOver.Defeated].Username
 
-	message := "Lost: " + gameOver.Defeated.String()
-	room.endGame(message)
+	// message := "Lost: " + gameOver.Defeated.String()
+	message := fmt.Sprintf("%s has been defeated", defeated)
+	room.endGame(gameOver.Defeated, message)
 }
 
 func (room *Room) SendToClient(clientID uuid.UUID, message proto.Message) {
@@ -194,5 +210,13 @@ func (room *Room) SendToClient(clientID uuid.UUID, message proto.Message) {
 func (room *Room) SendToAllClients(message proto.Message) {
 	for _, client := range room.clients {
 		client.SendMessage(message)
+	}
+}
+
+func (room *Room) SendToAllClientsButClient(clientId uuid.UUID, message proto.Message) {
+	for _, client := range room.clients {
+		if client.ID != clientId {
+			client.SendMessage(message)
+		}
 	}
 }

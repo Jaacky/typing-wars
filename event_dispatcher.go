@@ -1,7 +1,6 @@
 package typingwars
 
 import (
-	"log"
 	"time"
 )
 
@@ -115,7 +114,8 @@ type EventDispatcher struct {
 	running bool
 	stop    chan bool
 
-	eventQueue chan eventHandler
+	priorityQueue chan eventHandler
+	eventQueue    chan eventHandler
 
 	timeTickListeners      []TimeTickListener
 	unitSpawnedListeners   []UnitSpawnedListener
@@ -130,6 +130,7 @@ func NewEventDispatcher(stop chan bool) *EventDispatcher {
 	return &EventDispatcher{
 		stop:                   stop,
 		running:                false,
+		priorityQueue:          make(chan eventHandler, eventQueuesCapacity),
 		eventQueue:             make(chan eventHandler, eventQueuesCapacity),
 		timeTickListeners:      []TimeTickListener{},
 		unitSpawnedListeners:   []UnitSpawnedListener{},
@@ -147,8 +148,9 @@ func (dispatcher *EventDispatcher) RunEventLoop() {
 		select {
 		case <-dispatcher.stop:
 			dispatcher.running = false
-			log.Println("dispatcher stop")
 			return
+		case handler := <-dispatcher.priorityQueue:
+			handler.handle()
 		case handler := <-dispatcher.eventQueue:
 			// fmt.Printf("Event queue popped: %v\n", handler)
 			handler.handle()
@@ -240,5 +242,5 @@ func (dispatcher *EventDispatcher) FireGameOver(gameOver *GameOver) {
 		eventListeners: dispatcher.gameOverListeners,
 	}
 
-	dispatcher.eventQueue <- handler
+	dispatcher.priorityQueue <- handler
 }

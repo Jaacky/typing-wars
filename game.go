@@ -28,9 +28,9 @@ func NewGame(room *Room) *Game {
 	teams := makeTeams(clients, 2)
 	space := NewSpace(clients)
 
-	eventDispatcherStop := make(chan bool)
-	physicsTickerStop := make(chan bool)
-	unitSpawnerStop := make(chan bool)
+	eventDispatcherStop := make(chan bool, 1)
+	physicsTickerStop := make(chan bool, 1)
+	unitSpawnerStop := make(chan bool, 1)
 
 	eventDispatcher := NewEventDispatcher(eventDispatcherStop)
 	physicsTicker := NewPhysicsTicker(physicsTickerStop, eventDispatcher)
