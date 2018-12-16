@@ -42,5 +42,4 @@
   unused-packages = true
 
 [metadata.heroku]
-  root-package = "typing-wars"
-  install = ["./cmd/..."]
+  root-package = "typingwars"
