@@ -1,1 +1,1 @@
-web: ./typingwars
+web: typingwars
