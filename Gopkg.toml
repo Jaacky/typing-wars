@@ -43,4 +43,4 @@
 
 [metadata.heroku]
   root-package = "typing-wars"
-  install = ["./..."]
+  install = ["./cmd/..."]
