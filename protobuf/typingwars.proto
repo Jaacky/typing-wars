@@ -1,5 +1,5 @@
 syntax = "proto3";
-package typingwars;
+package main;
 option go_package = "pb";
 
 // enum UserInput {

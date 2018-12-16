@@ -1,4 +1,4 @@
-package typingwars
+package main
 
 import (
 	"github.com/Jaacky/typingwars/pb"

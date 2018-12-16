@@ -1,4 +1,4 @@
-package typingwars
+package main
 
 import "log"
 
@@ -21,6 +21,7 @@ func (bm *BaseManager) Damage(base *Base) {
 		gameOver := &GameOver{
 			Defeated: base.Owner(),
 		}
+		log.Println("firing game over")
 		bm.eventDispatcher.FireGameOver(gameOver)
 	}
 }

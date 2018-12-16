@@ -1,4 +1,4 @@
-package typingwars
+package main
 
 const (
 	createGameRoomMessageType          = "CREATE_GAME_ROOM"
