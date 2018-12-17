@@ -1,9 +1,9 @@
-package main
+package typingwars
 
 import (
 	"math"
 
-	"github.com/Jaacky/typingwars/types"
+	"github.com/Jaacky/typingwars/backend/types"
 	"github.com/gofrs/uuid"
 )
 

@@ -1,3 +1,3 @@
-package main
+package typingwars
 
 type PhysicsReady struct{}

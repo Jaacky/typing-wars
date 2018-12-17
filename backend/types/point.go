@@ -1,6 +1,6 @@
 package types
 
-import "github.com/Jaacky/typingwars/pb"
+import "github.com/Jaacky/typingwars/backend/pb"
 
 // Point struct
 type Point struct {

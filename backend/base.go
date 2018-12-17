@@ -1,9 +1,9 @@
-package main
+package typingwars
 
 import (
-	"github.com/Jaacky/typingwars/constants"
-	"github.com/Jaacky/typingwars/pb"
-	"github.com/Jaacky/typingwars/types"
+	"github.com/Jaacky/typingwars/backend/constants"
+	"github.com/Jaacky/typingwars/backend/pb"
+	"github.com/Jaacky/typingwars/backend/types"
 	"github.com/gofrs/uuid"
 )
 

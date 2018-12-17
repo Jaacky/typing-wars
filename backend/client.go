@@ -1,4 +1,4 @@
-package main
+package typingwars
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Jaacky/typingwars/pb"
+	"github.com/Jaacky/typingwars/backend/pb"
 	"github.com/golang/protobuf/proto"
 
 	"github.com/gofrs/uuid"

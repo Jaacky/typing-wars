@@ -1,10 +1,10 @@
-package main
+package typingwars
 
 import (
 	"fmt"
 	"log"
 
-	"github.com/Jaacky/typingwars/pb"
+	"github.com/Jaacky/typingwars/backend/pb"
 	"github.com/gofrs/uuid"
 	"github.com/golang/protobuf/proto"
 )

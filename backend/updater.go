@@ -1,4 +1,4 @@
-package main
+package typingwars
 
 type Updater struct {
 	baseManager     *BaseManager

@@ -1,13 +1,13 @@
-package main
+package typingwars
 
 import (
 	"log"
 	"math/rand"
 	"time"
 
-	"github.com/Jaacky/typingwars/constants"
-	"github.com/Jaacky/typingwars/types"
-	"github.com/Jaacky/typingwars/wordgenerator"
+	"github.com/Jaacky/typingwars/backend/constants"
+	"github.com/Jaacky/typingwars/backend/types"
+	"github.com/Jaacky/typingwars/backend/wordgenerator"
 )
 
 type UnitSpawner struct {

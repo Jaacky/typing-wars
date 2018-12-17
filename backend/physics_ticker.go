@@ -1,10 +1,10 @@
-package main
+package typingwars
 
 import (
 	"log"
 	"time"
 
-	"github.com/Jaacky/typingwars/constants"
+	"github.com/Jaacky/typingwars/backend/constants"
 )
 
 type PhysicsTicker struct {

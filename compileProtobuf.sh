@@ -1,3 +1,3 @@
 #!/bin/sh
 
-protoc -I=./protobuf --go_out=./pb ./protobuf/*.proto
+protoc -I=./protobuf --go_out=./backend/pb ./protobuf/*.proto

@@ -1,7 +1,7 @@
-package main
+package typingwars
 
 import (
-	"github.com/Jaacky/typingwars/pb"
+	"github.com/Jaacky/typingwars/backend/pb"
 	"github.com/gofrs/uuid"
 )
 
