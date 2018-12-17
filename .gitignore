@@ -1,1 +1,7 @@
+.DS_STORE
 NOTES.md
+
+ui/node_modules/
+ui/dist/
+ui/src/sockets
+ui/getLatestProtobuf.sh

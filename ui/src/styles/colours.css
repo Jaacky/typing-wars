@@ -1,0 +1,77 @@
+.base03 {
+    color: #002b36;
+}
+@value alt_base_background: #002b36;
+
+.base02 {
+    color: #073642;
+}
+.base01 {
+    color: #586e75;
+}
+.base00 {
+    color: #657b83;
+}
+@value alt_base_content_colour: #657b83;
+
+
+.base0 {
+    color: #839496;
+}
+@value base_content_color: #839496;
+
+.base1 {
+    color: #93a1a1;
+}
+@value secondary_background: #93a1a1;
+
+.base2 {
+    color: #eee8d5;
+}
+@value base_background: #eee8d5;
+
+.base3 {
+    color: #fdf6e3;
+}
+.yellow {
+    color: #b58900;
+}
+.orange {
+    color: #cb4b16;
+}
+.red {
+    color: #dc322f;
+}
+.magent {
+    color: #d33682;
+}
+.violet {
+    color: #6c71c4;
+}
+.blue {
+    color: #268bd2;
+}
+.cyan {
+    color: #2aa198;
+}
+.green {
+    color: #859900;
+}
+
+@value cyant: #2aa198;
+
+
+
+
+
+
+/* fresh */
+/* @value primary: rgb(23, 144, 153); */
+/* @value primary_fade: rgba(23, 144, 153, 0.25); */
+
+@value primary: hsl(184, 73.9%, 34.5%);
+@value primary_saturated: hsl(184, 73.9%, 24.5%);
+@value primary_fade: hsla(184, 73.9%, 34.5%, 25%);
+
+/* rgb(239, 99, 101) */
+@value error: hsl(359, 81.4%, 66.3%);

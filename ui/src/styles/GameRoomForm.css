@@ -1,0 +1,96 @@
+@value nav_height, element_padding from './layout.css';
+@value primary, primary_fade, primary_saturated, error from "./colours.css";
+
+.Container {
+    /* display: flex;
+    flex-wrap: wrap; */
+    display: grid;
+    grid-template-rows: 1fr 1fr 1fr;
+    /* align-items: center; */
+    justify-content: center;
+    height: calc(100vh - nav_height);
+    /* width: 100vw; */
+    width: 100%;
+}
+
+.Headline {
+    text-align: center;
+    font-family: 'Futura Thin';
+    letter-spacing: 0.1em;
+    font-size: 3rem;
+    /* font-weight: 400; */
+}
+
+.GameRoomForm {
+    /* box-shadow: 0px 4px 6px 0 hsla(0, 0%, 0%, 0.2); */
+    /* display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+    max-width: 350px; */
+    max-width: 275px;
+    grid-row: 2;
+    position: relative;
+}
+
+.GameRoomForm > form, .GameRoomForm > div {
+    /* padding: 10px; */
+    width: 100%;
+    padding-top: 25px;
+}
+
+.GameRoomForm > div {
+    border-bottom: 6px solid primary;
+}
+
+/* .GameRoomForm > form {
+    padding-top: 25px;
+} */
+
+.GameRoomForm input {
+    font-family: 'Enriqueta';
+    margin: 0;
+    /* padding: 8px 12px; */
+    padding: element_padding;
+    width: 100%;
+    text-align: left;
+    /* border: 1px solid hsla(0, 0%, 0%, 0.2); */
+    border: none;
+    box-shadow: 0px 2px 6px 0 hsla(0, 0%, 0%, 0.2);
+    border-radius: 2px;
+}
+
+.GameRoomForm input[type=submit] {
+    color: white;
+    background-color: primary;
+}
+
+.GameRoomForm input[type=submit]:hover {
+    background-color: primary_saturated;
+}
+
+input.Field {
+    box-shadow: 0px 2px 6px 0 hsla(0, 0%, 0%, 0.2) inset;
+}
+
+.ClientErrorDisplay{
+    grid-row: 3;
+    width: 100%;
+    border-bottom: none;
+    transition: all .08s ease-in;
+    line-height: 0;
+    height: 0;
+    overflow: hidden;
+}
+
+.ClientErrorDisplay.active {
+    line-height: 1.5;
+    height: auto;
+}
+
+.ClientError {
+    background-color: error;
+    padding: 4px 8px;
+}

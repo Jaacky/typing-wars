@@ -1,0 +1,103 @@
+@value nav_height, subnav_height, element_padding, side_padding, shadow_border from "./layout.css";
+@value primary, primary_fade, primary_saturated from "./colours.css";
+
+.GameRoom {
+    height: calc(100vh - nav_height);
+}
+
+.Header {
+    height: subnav_height;
+    /* border: 1px solid black; */
+    padding: 0px side_padding;
+    background-color: primary_fade;
+}
+
+.Header h1 {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: primary_saturated;
+    font-weight: 400;
+    font-size: 1.5rem;
+}
+
+.Display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+
+    height: calc(100vh - nav_height - subnav_height);
+}
+
+/* ul {
+    box-shadow: 0 4px 6px 0 hsla(0, 0%, 0%, 0.2);
+    padding: 18px;
+    border-radius: 1px;
+} */
+
+.Player {
+    box-shadow: shadow_border;
+    padding: element_padding;
+    padding: 18px 12px;
+    margin: 8px;
+    min-width: 225px;
+}
+
+.Player.You {
+    border-left: 10px solid primary;
+}
+
+.Button {
+    padding: element_padding;
+    border-radius: 2px;
+    background-color: primary;
+    margin-top: 8px;
+    color: white;
+}
+
+.Button:hover {
+    background-color: primary_saturated;
+}
+
+.Button:disabled {
+    background-color: primary_fade;
+}
+
+.PlayerReady {
+    /* background-color: yellowgreen; */
+    background-color: primary_fade;
+}
+
+.Message {
+    border: 1px solid black;
+    text-align: center;
+    padding: 6px 8px;
+}
+
+.Message h3 {
+    display: inline-block;
+}
+
+.Close {
+    width: 32px;
+    height: 32px;
+    opacity: 0.3;
+}
+
+.Close:hover {
+    opacity: 1;
+}
+
+.Close div {
+    border: 1px solid black;
+}
+
+.Close div:nth-child(1) {
+    transform: rotate(45deg);
+}
+.Close div:nth-child(2){
+    transform: rotate(-45deg);
+}

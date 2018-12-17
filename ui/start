@@ -1,0 +1,2 @@
+./compileProtobuf.sh
+yarn start

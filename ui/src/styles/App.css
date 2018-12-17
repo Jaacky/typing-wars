@@ -1,0 +1,6 @@
+@value nav_height from './layout.css';
+
+.Main {
+    height: calc(100vh - nav_height);
+    width: 100%;
+}

@@ -2,22 +2,17 @@ syntax = "proto3";
 package typingwars;
 option go_package = "pb";
 
-// enum UserInput {
-//     KEY = 0;
-// }
-
 message UserInput {
     string key = 1;
 }
 
 message UserAction {
     UserInput userInput = 1;
-
 }
 
-// message RegisterPlayer {
-//     string username = 1;
-// }
+message ClientError {
+    string message = 1;
+}
 
 message CreateRoomRequest {
     string username = 1;
@@ -98,7 +93,7 @@ message UserMessage {
     oneof content {
         Space space = 1;
         UserAction userAction = 2;
-        // RegisterPlayer registerPlayer = 3;
+        ClientError clientError = 3;
         CreateRoomRequest createRoomRequest = 4;
         JoinRoomRequest joinRoomRequest = 5;
         JoinRoomAck joinRoomAck = 6;

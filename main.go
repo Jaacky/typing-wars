@@ -4,6 +4,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	typingwars "github.com/Jaacky/typingwars/backend"
 )
 
 func main() {
@@ -14,7 +16,7 @@ func main() {
 		port = ":" + port
 	}
 
-	server := NewServer()
+	server := typingwars.NewServer()
 	server.Listen()
 	log.Println("Listening on port - ", port)
 	log.Fatal(http.ListenAndServe(port, nil))
