@@ -12,23 +12,15 @@ RUN apk update && apk add --no-cache git curl
 
 RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
-COPY . $GOPATH/src/github.com/Jaacky/typingwars/
 WORKDIR $GOPATH/src/github.com/Jaacky/typingwars/
 
-# copies the Gopkg.toml and Gopkg.lock to WORKDIR
-COPY Gopkg.toml Gopkg.lock ./
+# Copy neccessary files
+COPY backend ./backend
+COPY Gopkg.toml Gopkg.lock main.go ./
 
 # install the dependencies without checking for go code
 RUN dep ensure -vendor-only
-
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /go/bin/typingwars
-
-# # Fetch dependencies.
-# # Using go get.
-# RUN go get -d -v
-# # Build the binary.
-# RUN go build -o /go/bin/hello
-
 
 ############################
 # STEP 2 build a small image
