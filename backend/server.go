@@ -77,8 +77,10 @@ func (server *Server) Listen() {
 		client.Listen()
 	}
 
+	http.Handle("/", http.FileServer(http.Dir("./ui/dist")))
 	http.HandleFunc("/connect", connect)
-	http.HandleFunc("/", home)
+
+	// http.HandleFunc("/", home)
 
 	go server.manageRooms()
 	log.Println("End of serverlisten")
