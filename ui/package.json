@@ -1,7 +1,7 @@
 {
   "name": "tradelog",
   "version": "0.0.1",
-  "main": "index.js",
+  "private": true,
   "author": "Jacky Van",
   "license": "MIT",
   "devDependencies": {
