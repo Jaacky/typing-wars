@@ -29,6 +29,8 @@ COPY --from=ui-builder /home/node/app/ui/dist ./ui/dist
 
 # install the dependencies without checking for go code
 RUN dep ensure -vendor-only
+RUN go get -u github.com/gobuffalo/packr/v2/packr2
+RUN packr2
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /go/bin/typingwars
 
 ############################
