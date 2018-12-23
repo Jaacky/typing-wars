@@ -1,0 +1,9 @@
+version: '3'
+services:
+  typingwars:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: typingwars
+    ports:
+      - "8080:8080"
