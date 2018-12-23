@@ -1,3 +1,11 @@
+FROM node:8 AS ui-builder
+
+WORKDIR /home/node/app
+COPY ui ./ui
+
+WORKDIR /home/node/app/ui
+RUN yarn install && yarn build
+
 ############################
 # STEP 1 build executable binary
 ############################
@@ -17,6 +25,7 @@ WORKDIR $GOPATH/src/github.com/Jaacky/typingwars/
 # Copy neccessary files
 COPY backend ./backend
 COPY Gopkg.toml Gopkg.lock main.go ./
+COPY --from=ui-builder /home/node/app/ui/dist ./ui/dist
 
 # install the dependencies without checking for go code
 RUN dep ensure -vendor-only
