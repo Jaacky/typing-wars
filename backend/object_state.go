@@ -4,7 +4,7 @@ import (
 	"math"
 
 	"github.com/Jaacky/typingwars/backend/types"
-	"github.com/gofrs/uuid"
+	"github.com/gofrs/uuid/v3"
 )
 
 type ObjectState struct {

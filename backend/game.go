@@ -3,7 +3,7 @@ package typingwars
 import (
 	"log"
 
-	"github.com/gofrs/uuid"
+	"github.com/gofrs/uuid/v3"
 )
 
 // Game strcut

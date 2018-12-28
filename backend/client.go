@@ -9,7 +9,7 @@ import (
 	"github.com/Jaacky/typingwars/backend/pb"
 	"github.com/golang/protobuf/proto"
 
-	"github.com/gofrs/uuid"
+	"github.com/gofrs/uuid/v3"
 	"github.com/gorilla/websocket"
 )
 

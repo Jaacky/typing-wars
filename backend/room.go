@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/Jaacky/typingwars/backend/pb"
-	"github.com/gofrs/uuid"
+	"github.com/gofrs/uuid/v3"
 	"github.com/golang/protobuf/proto"
 )
 
