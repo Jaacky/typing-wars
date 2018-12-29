@@ -14,21 +14,23 @@ type UnitSpawner struct {
 	eventDispatcher *EventDispatcher
 	space           *Space
 	teams           []*Team
+	spawnSpeed      time.Duration
 	stop            chan bool
 }
 
-func NewUnitSpawner(stop chan bool, dispatcher *EventDispatcher, space *Space, teams []*Team) *UnitSpawner {
+func NewUnitSpawner(dispatcher *EventDispatcher, space *Space, teams []*Team, spawnSpeed time.Duration) *UnitSpawner {
 	return &UnitSpawner{
 		eventDispatcher: dispatcher,
 		space:           space,
 		teams:           teams,
-		stop:            stop,
+		spawnSpeed:      spawnSpeed,
+		stop:            make(chan bool, 1),
 	}
 }
 
 func (spawner *UnitSpawner) Run() {
 	wg := wordgenerator.NewWordGenerator()
-	for range time.Tick(constants.UnitSpawningInterval) {
+	for range time.Tick(spawner.spawnSpeed) {
 		select {
 		case <-spawner.stop:
 			log.Println("Spawner stopped")
