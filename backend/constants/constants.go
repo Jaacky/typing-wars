@@ -6,7 +6,7 @@ import (
 
 const (
 	PhysicsFrameDuration       = 200 * time.Millisecond
-	UnitSpawningInterval       = 1 * time.Second
+	UnitSpawningInterval       = 4 * time.Second
 	DifficultyIncreaseInterval = 5 * time.Second
 	BaseHp                     = 50
 	UnitSpeed                  = 2

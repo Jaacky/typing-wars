@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Jaacky/typingwars/backend/constants"
+	"github.com/Jaacky/typingwars/backend/wordgenerator"
 )
 
 type DifficultyTicker struct {
@@ -12,6 +13,7 @@ type DifficultyTicker struct {
 	space           *Space
 	teams           []*Team
 	unitSpawners    map[time.Duration]*UnitSpawner
+	wordGenerator   *wordgenerator.WordGenerator
 	stop            chan bool
 }
 
@@ -21,11 +23,13 @@ func NewDifficultyTicker(stop chan bool, dispatcher *EventDispatcher, space *Spa
 		space:           space,
 		teams:           teams,
 		unitSpawners:    make(map[time.Duration]*UnitSpawner),
+		wordGenerator:   wordgenerator.NewWordGenerator(),
 		stop:            stop,
 	}
 }
 
 func (ticker *DifficultyTicker) Run() {
+	spawnSpeed := constants.UnitSpawningInterval * 2
 	for range time.Tick(constants.DifficultyIncreaseInterval) {
 		select {
 		case <-ticker.stop:
@@ -35,11 +39,11 @@ func (ticker *DifficultyTicker) Run() {
 			}
 			return
 		default:
-			log.Println("Difficulty ticker - increasing spawn speed")
-			spawnSpeed := constants.UnitSpawningInterval / 2
-			spawner := NewUnitSpawner(ticker.eventDispatcher, ticker.space, ticker.teams, spawnSpeed)
+			log.Printf("Difficulty ticker - increasing spawn speed, interval: %v, spawnspeed: %v\n", constants.DifficultyIncreaseInterval, spawnSpeed)
+			spawnSpeed = spawnSpeed / 2
+			spawner := NewUnitSpawner(ticker.eventDispatcher, ticker.space, ticker.teams, ticker.wordGenerator, spawnSpeed)
 			ticker.unitSpawners[spawnSpeed] = spawner
-			spawner.Run()
+			go spawner.Run()
 		}
 	}
 }
