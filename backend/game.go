@@ -8,17 +8,17 @@ import (
 
 // Game strcut
 type Game struct {
-	Clients         map[uuid.UUID]*Client
-	Teams           []*Team
-	Space           *Space
-	InGame          bool
-	EventDispatcher *EventDispatcher
-	physicsTicker   *PhysicsTicker
-	unitSpawner     *UnitSpawner
+	Clients          map[uuid.UUID]*Client
+	Teams            []*Team
+	Space            *Space
+	InGame           bool
+	EventDispatcher  *EventDispatcher
+	physicsTicker    *PhysicsTicker
+	difficultyTicker *DifficultyTicker
 
-	eventDispatcherStop chan bool
-	physicsTickerStop   chan bool
-	unitSpawnerStop     chan bool
+	eventDispatcherStop  chan bool
+	physicsTickerStop    chan bool
+	difficultyTickerStop chan bool
 }
 
 // NewGame struct
@@ -30,11 +30,11 @@ func NewGame(room *Room) *Game {
 
 	eventDispatcherStop := make(chan bool, 1)
 	physicsTickerStop := make(chan bool, 1)
-	unitSpawnerStop := make(chan bool, 1)
+	difficultyTickerStop := make(chan bool, 1)
 
 	eventDispatcher := NewEventDispatcher(eventDispatcherStop)
 	physicsTicker := NewPhysicsTicker(physicsTickerStop, eventDispatcher)
-	unitSpawner := NewUnitSpawner(unitSpawnerStop, eventDispatcher, space, teams)
+	difficultyTicker := NewDifficultyTicker(difficultyTickerStop, eventDispatcher, space, teams)
 
 	updater := NewUpdater(space, eventDispatcher)
 	eventDispatcher.RegisterTimeTickListener(updater)
@@ -45,15 +45,15 @@ func NewGame(room *Room) *Game {
 	eventDispatcher.RegisterGameOverListener(room)
 
 	return &Game{
-		Space:               space,
-		Teams:               teams,
-		Clients:             clients,
-		EventDispatcher:     eventDispatcher,
-		physicsTicker:       physicsTicker,
-		unitSpawner:         unitSpawner,
-		eventDispatcherStop: eventDispatcherStop,
-		physicsTickerStop:   physicsTickerStop,
-		unitSpawnerStop:     unitSpawnerStop,
+		Space:                space,
+		Teams:                teams,
+		Clients:              clients,
+		EventDispatcher:      eventDispatcher,
+		physicsTicker:        physicsTicker,
+		difficultyTicker:     difficultyTicker,
+		eventDispatcherStop:  eventDispatcherStop,
+		physicsTickerStop:    physicsTickerStop,
+		difficultyTickerStop: difficultyTickerStop,
 	}
 }
 
@@ -79,11 +79,11 @@ func makeTeams(clients map[uuid.UUID]*Client, numTeams int) []*Team {
 func (g *Game) start() {
 	go g.EventDispatcher.RunEventLoop()
 	go g.physicsTicker.Run()
-	go g.unitSpawner.Run()
+	go g.difficultyTicker.Run()
 }
 
 func (g *Game) stop() {
 	g.eventDispatcherStop <- true
 	g.physicsTickerStop <- true
-	g.unitSpawnerStop <- true
+	g.difficultyTickerStop <- true
 }

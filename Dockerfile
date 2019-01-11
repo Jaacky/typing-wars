@@ -35,6 +35,8 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /go/bin/typingwar
 FROM scratch
 # Copy our static executable.
 COPY --from=builder /go/bin/typingwars /go/bin/typingwars
+COPY backend/wordgenerator/eff_large_wordlist.txt /wordgenerator/eff_large_wordlist.txt
+
 # Run the hello binary.
 EXPOSE 8080
 ENTRYPOINT ["/go/bin/typingwars"]

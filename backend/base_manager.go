@@ -16,7 +16,6 @@ func NewBaseManager(space *Space, eventDispatcher *EventDispatcher) *BaseManager
 
 func (bm *BaseManager) Damage(base *Base) {
 	base.Hp--
-	log.Printf("Base hp: %d", base.Hp)
 	if base.Hp <= 0 {
 		gameOver := &GameOver{
 			Defeated: base.Owner(),
