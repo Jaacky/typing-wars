@@ -8,7 +8,8 @@ import pb from '../pb/typingwars.pb';
 import * as types from 'actions/types';
 import * as actions from 'actions';
 
-const websocketPath = "ws://localhost:8080/connect"; 
+// const websocketPath = "ws://localhost:8080/connect"; 
+const websocketPath = "ws://" + location.host + "/connect";
 // const websocketPath = "ws://typing-wars.herokuapp.com/connect"; 
 
 function watchIncomingMessages(socket) {
