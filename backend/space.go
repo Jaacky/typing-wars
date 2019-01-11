@@ -4,7 +4,7 @@ import (
 	"github.com/Jaacky/typingwars/backend/constants"
 	"github.com/Jaacky/typingwars/backend/pb"
 	"github.com/Jaacky/typingwars/backend/types"
-	"github.com/gofrs/uuid"
+	"github.com/gofrs/uuid/v3"
 )
 
 type Space struct {

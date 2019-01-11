@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/Jaacky/typingwars/backend/types"
-	"github.com/gofrs/uuid"
+	"github.com/gofrs/uuid/v3"
 )
 
 func TestNewObjectState(t *testing.T) {

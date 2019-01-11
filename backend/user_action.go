@@ -1,6 +1,6 @@
 package typingwars
 
-import "github.com/gofrs/uuid"
+import "github.com/gofrs/uuid/v3"
 
 type UserAction struct {
 	Owner uuid.UUID
