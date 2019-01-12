@@ -7,3 +7,12 @@ services:
     container_name: typingwars
     ports:
       - "8080:8080"
+  
+  nginx:
+    build:
+      context: ./proxy
+      dockerfile: DockerFile
+    container_name: nginx
+    ports:
+      - "80:80"
+      - "443:443"
