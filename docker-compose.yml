@@ -7,6 +7,14 @@ services:
     container_name: typingwars
     ports:
       - "8080:8080"
+
+  ui:
+    build:
+      context: ./ui
+      dockerfile: Dockerfile
+    container_name: ui
+    volumes:
+      - "./ui/nginx.conf:/etc/nginx/nginx.conf"
   
   nginx:
     build:
