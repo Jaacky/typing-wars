@@ -27,5 +27,5 @@ COPY --from=binary_builder /go/bin/typingwars /go/bin/typingwars
 COPY backend/wordgenerator/eff_large_wordlist.txt /wordgenerator/eff_large_wordlist.txt
 
 # Run the hello binary.
-EXPOSE 8080
+EXPOSE 80
 ENTRYPOINT ["/go/bin/typingwars"]
