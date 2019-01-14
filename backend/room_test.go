@@ -36,9 +36,9 @@ func TestNewRoom(t *testing.T) {
 	}
 }
 
-func mockClient() *Client {
+func mockClient(id uuid.UUID) *Client {
 	return &Client{
-		ID:     uuid.UUID{},
+		ID:     id,
 		Conn:   nil,
 		Server: nil,
 		Room:   nil,
@@ -52,7 +52,7 @@ func TestAddClient(t *testing.T) {
 	room := NewRoom()
 
 	username := "testClient"
-	client := mockClient()
+	client := mockClient(uuid.UUID{})
 
 	room.addClient(client, username)
 
@@ -81,5 +81,21 @@ func TestAddClient(t *testing.T) {
 
 	if room.playerStatuses[client.ID].index != playerStatusIndex {
 		t.Errorf("Newly added client's ready status doesn't match, want: %d, got: %d", playerStatusIndex, room.playerStatuses[client.ID].index)
+	}
+}
+
+func TestUpdatePlayerReady(t *testing.T) {
+	room := NewRoom()
+
+	username := "testClient"
+	id := uuid.UUID{}
+	client := mockClient(id)
+	readyStatus := true
+
+	room.addClient(client, username)
+	room.updatePlayerReady(id, readyStatus)
+
+	if room.playerStatuses[id].ready != readyStatus {
+		t.Errorf("After update player ready, ready status doesn't match, want: %t, got: %t", readyStatus, room.playerStatuses[id].ready)
 	}
 }
