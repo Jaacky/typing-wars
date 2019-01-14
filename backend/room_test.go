@@ -99,3 +99,31 @@ func TestUpdatePlayerReady(t *testing.T) {
 		t.Errorf("After update player ready, ready status doesn't match, want: %t, got: %t", readyStatus, room.playerStatuses[id].ready)
 	}
 }
+
+func TestStartGame(t *testing.T) {
+	room := NewRoom()
+	inGame := true
+	room.start()
+
+	if room.InGame != inGame {
+		t.Errorf("Game started, InGame flag doesn't match, want: %t, got: %t", inGame, room.InGame)
+	}
+
+	if room.game == nil {
+		t.Error("Game started, game should not be nil")
+	}
+}
+
+func TestEndGame(t *testing.T) {
+	room := NewRoom()
+	inGame := false
+	room.start()
+	room.endGame(uuid.UUID{}, "Testing end game")
+	if room.InGame != inGame {
+		t.Errorf("Game ended, InGame flag doesn't match, want: %t, got: %t", inGame, room.InGame)
+	}
+
+	if room.game != nil {
+		t.Error("Game ended, game should be nil")
+	}
+}

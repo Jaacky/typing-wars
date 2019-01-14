@@ -121,6 +121,7 @@ func (room *Room) start() {
 
 func (room *Room) endGame(defeated uuid.UUID, msg string) {
 	room.game.stop()
+	room.game = nil
 	room.InGame = false
 	pbEndGame := &pb.EndGame{
 		Message: msg,
