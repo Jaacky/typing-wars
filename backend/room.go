@@ -48,7 +48,7 @@ func (room *Room) addClient(client *Client, username string) {
 		return
 	}
 
-	room.totalPlayers += 1
+	room.totalPlayers++
 
 	currentPlayer := NewPlayer(client.ID, username)
 	room.clients[client.ID] = client
