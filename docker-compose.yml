@@ -23,5 +23,5 @@ services:
       - "./proxy/nginx.conf:/etc/nginx/nginx.conf"
       - "./proxy/conf.d:/etc/nginx/conf.d"
     ports:
-      - "80:80"
-      - "443:443"
+      - "${PROXY_HTTP_PORT}:${PROXY_HTTP_PORT}"
+      - "${PROXY_HTTPS_PORT}:${PROXY_HTTPS_PORT}"
