@@ -6,9 +6,12 @@ import (
 	"os"
 
 	typingwars "github.com/Jaacky/typingwars/backend"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
+	http.Handle("/metrics", promhttp.Handler())
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = ":80"
